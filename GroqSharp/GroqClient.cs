@@ -3,8 +3,8 @@ using GroqSharp.Models;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class GroqClient : IGroqClient
 {
@@ -12,20 +12,13 @@ public class GroqClient : IGroqClient
     private readonly string _apiKey;
     private readonly string _defaultModel;
 
+    private const string ChatCompletionsEndpoint = "chat/completions";
+    private const string ModelsEndpoint = "models";
+
     public GroqClient(HttpClient httpClient, IConfigurationSection groqConfig)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-
-        // Special handling for setup scenario
-        if (groqConfig == null)
-        {
-            _apiKey = "temp"; // Will be replaced in API calls during setup
-            _defaultModel = "llama-3.3-70b-versatile";
-            return;
-        }
-
-        _apiKey = groqConfig["ApiKey"] ?? throw new ArgumentException("API Key is missing in configuration");
-        _defaultModel = groqConfig["DefaultModel"] ?? "llama-3.3-70b-versatile";
+        (_apiKey, _defaultModel) = ParseConfiguration(groqConfig, "llama-3.3-70b-versatile");
     }
 
     public async Task<List<string>> GetAvailableModelsAsync()
@@ -39,9 +32,9 @@ public class GroqClient : IGroqClient
 
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "models");
+            var request = new HttpRequestMessage(HttpMethod.Get, ModelsEndpoint);
 
-            if (_apiKey != "temp") // Skip auth during setup
+            if (_apiKey != "temp")
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
             }
@@ -50,30 +43,31 @@ public class GroqClient : IGroqClient
             response.EnsureSuccessStatusCode();
 
             var modelResponse = await response.Content.ReadFromJsonAsync<ModelListResponse>();
-
             var models = modelResponse?.Data?.Select(m => m.Id).ToList() ?? fallbackModels;
 
             return MarkDefaultModel(models, _defaultModel);
         }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Network/API error while fetching models: {ex.Message}");
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"JSON parsing error while fetching models: {ex.Message}");
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Could not fetch models from API. Error: {ex.Message}");
-            return MarkDefaultModel(fallbackModels, _defaultModel);
+            Console.WriteLine($"Unexpected error while fetching models: {ex.Message}");
         }
-    }
 
-    private List<string> MarkDefaultModel(List<string> models, string defaultModel)
-    {
-        return models.Select(m =>
-            m == defaultModel ? $"{m} (Default)" : m
-        ).ToList();
+        return MarkDefaultModel(fallbackModels, _defaultModel);
     }
 
     public async Task<string> CompleteChatAsync(ChatRequest request)
     {
         try
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, ChatCompletionsEndpoint)
             {
                 Content = JsonContent.Create(request, options: new JsonSerializerOptions
                 {
@@ -96,9 +90,19 @@ public class GroqClient : IGroqClient
             var responseContent = await response.Content.ReadFromJsonAsync<ChatResponse>();
             return responseContent?.Choices?[0]?.Message?.Content ?? "No response content";
         }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"HTTP request failed: {ex.Message}");
+            throw;
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"JSON parsing failed: {ex.Message}");
+            throw;
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"API Call Failed: {ex.Message}");
+            Console.WriteLine($"Unexpected API error: {ex.Message}");
             throw;
         }
     }
@@ -111,5 +115,24 @@ public class GroqClient : IGroqClient
             Messages = new[] { new Message { Role = "user", Content = userMessage } }
         };
         return await CompleteChatAsync(request);
+    }
+
+    private static List<string> MarkDefaultModel(List<string> models, string defaultModel)
+    {
+        return models.Select(m =>
+            m == defaultModel ? $"{m} (Default)" : m
+        ).ToList();
+    }
+
+    private static (string apiKey, string model) ParseConfiguration(IConfigurationSection config, string fallbackModel)
+    {
+        if (config == null)
+        {
+            return ("temp", fallbackModel);
+        }
+
+        var apiKey = config["ApiKey"] ?? throw new ArgumentException("API Key is missing in configuration");
+        var model = config["DefaultModel"] ?? fallbackModel;
+        return (apiKey, model);
     }
 }

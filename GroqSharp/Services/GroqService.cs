@@ -8,16 +8,22 @@ namespace GroqSharp.Services
 
         public GroqService(IGroqClient groqClient)
         {
-            _groqClient = groqClient;
+            _groqClient = groqClient ?? throw new ArgumentNullException(nameof(groqClient));
         }
 
         public async Task<string> GetChatCompletionAsync(string prompt)
         {
+            if (string.IsNullOrWhiteSpace(prompt))
+                throw new ArgumentException("Prompt cannot be null or empty.", nameof(prompt));
+
             return await _groqClient.CompleteChatAsync(prompt);
         }
 
         public async Task<string> GetChatCompletionAsync(ChatRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             return await _groqClient.CompleteChatAsync(request);
         }
 
