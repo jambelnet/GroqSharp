@@ -23,5 +23,10 @@ namespace GroqSharp.Services
         /// </summary>
         /// <returns>A list of model names.</returns>
         Task<List<string>> GetAvailableModelsAsync();
+
+        /// <summary>
+        /// Streams chat completions from the model in real-time
+        /// </summary>
+        IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request);
     }
 }

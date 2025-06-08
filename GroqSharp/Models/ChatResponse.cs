@@ -37,6 +37,9 @@ namespace GroqSharp.Models
         [JsonPropertyName("message")]
         public Message? Message { get; set; }
 
+        [JsonPropertyName("delta")]
+        public Delta? Delta { get; set; } // Streaming only
+
         [JsonPropertyName("logprobs")]
         public object? LogProbs { get; set; }
 
@@ -72,5 +75,14 @@ namespace GroqSharp.Models
     {
         [JsonPropertyName("id")]
         public string? Id { get; set; }
+    }
+
+    public class Delta
+    {
+        [JsonPropertyName("role")]
+        public string? Role { get; set; }
+
+        [JsonPropertyName("content")]
+        public string? Content { get; set; }
     }
 }

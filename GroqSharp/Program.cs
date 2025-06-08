@@ -3,6 +3,7 @@ using GroqSharp.Models;
 using GroqSharp.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -147,6 +148,7 @@ class Program
         Console.WriteLine("Commands:");
         Console.WriteLine("  /models   - Show available models");
         Console.WriteLine("  /setmodel - Change current model");
+        Console.WriteLine("  /stream   - Start a streaming chat session");
         Console.WriteLine("  /exit     - Quit the application");
         Console.WriteLine("  /help     - Show this help");
         Console.ResetColor();
@@ -244,6 +246,63 @@ class Program
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Error setting model: {ex.Message}");
                     Console.ResetColor();
+                }
+                continue;
+            }
+
+            if (userInput.Equals("/stream", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Starting streaming session. Type your messages, '/end' to stop.");
+                Console.ResetColor();
+
+                while (true)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("\nYou: ");
+                    Console.ResetColor();
+                    var streamInput = Console.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(streamInput)) continue;
+                    if (streamInput.Equals("/end", StringComparison.OrdinalIgnoreCase)) break;
+
+                    try
+                    {
+                        var request = new ChatRequest
+                        {
+                            Model = currentModel ?? "llama-3.3-70b-versatile",
+                            Messages = new[] { new Message { Role = "user", Content = streamInput } },
+                            Stream = true
+                        };
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("AI: ");
+
+                        var buffer = new StringBuilder();
+                        await foreach (var chunk in groqService.StreamChatCompletionAsync(request))
+                        {
+                            buffer.Append(chunk);
+                            if (buffer.Length > 10 || chunk.EndsWith(' ') || chunk.EndsWith('\n'))
+                            {
+                                Console.Write(buffer.ToString());
+                                buffer.Clear();
+                            }
+                        }
+                        if (buffer.Length > 0)
+                        {
+                            Console.Write(buffer.ToString());
+                        }
+                        Console.WriteLine();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
+                    finally
+                    {
+                        Console.ResetColor();
+                    }
                 }
                 continue;
             }

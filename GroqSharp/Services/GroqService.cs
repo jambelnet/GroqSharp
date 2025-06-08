@@ -27,6 +27,14 @@ namespace GroqSharp.Services
             return await _groqClient.CompleteChatAsync(request);
         }
 
+        public IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return _groqClient.StreamChatCompletionAsync(request);
+        }
+
         public async Task<List<string>> GetAvailableModelsAsync()
         {
             return await _groqClient.GetAvailableModelsAsync();
