@@ -39,6 +39,7 @@ Run the application to enter an interactive chat session:
 Groq API Client Commands:
 - `/models` - Show available models
 - `/setmodel` - Change current model
+- `/stream` - Start a streaming chat session
 - `/exit` - Quit the application
 - `/help` - Show this help
 
