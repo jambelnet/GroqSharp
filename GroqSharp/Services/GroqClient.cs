@@ -1,7 +1,8 @@
 ﻿using GroqSharp;
+using GroqSharp.Configuration;
 using GroqSharp.Core;
 using GroqSharp.Models;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -12,14 +13,17 @@ public class GroqClient : IGroqClient
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _defaultModel;
+    private readonly GroqSettings _settings;
 
     private const string ChatCompletionsEndpoint = "chat/completions";
     private const string ModelsEndpoint = "models";
 
-    public GroqClient(HttpClient httpClient, IConfigurationSection groqConfig)
+    public GroqClient(HttpClient httpClient, IOptions<GroqSettings> options)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        (_apiKey, _defaultModel) = ParseConfiguration(groqConfig, GroqConstants.DefaultModel);
+        _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _apiKey = _settings.ApiKey ?? throw new ArgumentException("API Key is required");
+        _defaultModel = _settings.DefaultModel ?? GroqConstants.DefaultModel;
     }
 
     public async Task<string> CompleteChatAsync(ChatRequest request)
@@ -71,7 +75,9 @@ public class GroqClient : IGroqClient
         var request = new ChatRequest
         {
             Model = _defaultModel,
-            Messages = new[] { new Message { Role = "user", Content = userMessage } }
+            Messages = new[] { new Message { Role = "user", Content = userMessage } },
+            Temperature = _settings.DefaultTemperature,
+            MaxTokens = _settings.DefaultMaxTokens
         };
         return await CompleteChatAsync(request);
     }
@@ -219,17 +225,5 @@ public class GroqClient : IGroqClient
         return models.Select(m =>
             m == defaultModel ? $"{m} (Default)" : m
         ).ToList();
-    }
-
-    private static (string apiKey, string model) ParseConfiguration(IConfigurationSection config, string fallbackModel)
-    {
-        if (config == null)
-        {
-            return ("temp", fallbackModel);
-        }
-
-        var apiKey = config["ApiKey"] ?? throw new ArgumentException("API Key is missing in configuration");
-        var model = config["DefaultModel"] ?? fallbackModel;
-        return (apiKey, model);
     }
 }

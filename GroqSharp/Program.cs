@@ -1,11 +1,13 @@
 ﻿using GroqSharp;
 using GroqSharp.Commands.Models;
+using GroqSharp.Configuration;
 using GroqSharp.Core;
 using GroqSharp.Extensions;
 using GroqSharp.Models;
 using GroqSharp.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 class Program
@@ -60,7 +62,7 @@ class Program
     {
         // Configuration
         services.AddSingleton(config);
-        services.AddSingleton(config.GetSection("Groq"));
+        services.Configure<GroqSettings>(config.GetSection("Groq"));
 
         // Conversation persistence
         services.AddSingleton<ConversationPersistenceService>();
@@ -79,19 +81,24 @@ class Program
 
     private static async Task RunInitialSetup()
     {
-        var httpClient = new HttpClient { BaseAddress = new Uri("https://api.groq.com/openai/v1/") };
-        var tempClient = new GroqClient(httpClient, null);
+        var tempSettings = new GroqSettings
+        {
+            DefaultModel = GroqConstants.DefaultModel
+        };
 
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("Enter your Groq API key (get it from https://console.groq.com):");
         Console.ResetColor();
-        var apiKey = GetRequiredInput("API Key: ");
+        tempSettings.ApiKey = GetRequiredInput("API Key: ");
 
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("\nEnter base URL (press Enter for default 'https://api.groq.com/openai/v1/'):");
+        Console.WriteLine("\nEnter base URL (press Enter for default 'https://api.groq.com/openai/v1/'): ");
         Console.ResetColor();
         var baseUrl = Console.ReadLine();
-        baseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "https://api.groq.com/openai/v1/" : baseUrl;
+        tempSettings.BaseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "https://api.groq.com/openai/v1/" : baseUrl;
+
+        var httpClient = new HttpClient { BaseAddress = new Uri(tempSettings.BaseUrl) };
+        var tempClient = new GroqClient(httpClient, Options.Create(tempSettings));
 
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("\nFetching available models...");
@@ -131,13 +138,12 @@ class Program
         var maxTokensInput = Console.ReadLine();
         int maxTokens = int.TryParse(maxTokensInput, out var tokens) ? tokens : 1024;
 
-        // Save to config (no color change needed here)
         var config = new
         {
             Groq = new
             {
-                ApiKey = apiKey,
-                BaseUrl = baseUrl,
+                ApiKey = tempSettings.ApiKey,
+                BaseUrl = tempSettings.BaseUrl,
                 DefaultModel = selectedModel,
                 DefaultTemperature = temperature,
                 DefaultMaxTokens = maxTokens
