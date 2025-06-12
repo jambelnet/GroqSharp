@@ -39,7 +39,6 @@ This creates an `appsettings.json` file with your configuration for future runs.
 First-run setup creates `appsettings.json` with:
 
 ```json
-json
 {
   "Groq": {
     "ApiKey": "your_api_key",
@@ -58,15 +57,15 @@ json
 Run the application to enter an interactive chat session:
 
 Groq API Client Commands:
-`/models`   - Show available models
-`/setmodel` - Change current model
-`/stream`   - Start a streaming chat session
-`/history`  - Show previous conversation messages
-`/clear`    - Clear the current session
-`/process`  - Process a local file
-`/export`   - Export AI output to file
-`/exit`     - Quit the application
-`/help`     - Show this help
+- `/models`   - Show available models
+- `/setmodel` - Change current model
+- `/stream`   - Start a streaming chat session
+- `/history`  - Show previous conversation messages
+- `/clear`    - Clear the current session
+- `/process`  - Process a local file
+- `/export`   - Export AI output to file
+- `/exit`     - Quit the application
+- `/help`     - Show this help
 
 ```text
 You: [type your message here]
@@ -159,7 +158,7 @@ Supported file formats:
 
 Example:
 
-```bash
+```text
 /process sample.pdf
 Process this content? (y/n): y
 Export this response? (y/n): y
@@ -170,7 +169,7 @@ Enter output path: summary.txt
 
 AI output to export:
 
-```bash
+```text
 /export This is a sample request
 Enter output path (default extension .txt): C:\Temp\sample.txt
 Successfully exported to C:\Temp\sample.txt
