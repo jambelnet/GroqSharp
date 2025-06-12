@@ -8,7 +8,7 @@ namespace GroqSharp.Models
         /// ID of the model to use (default: llama-3.3-70b-versatile)
         /// </summary>
         [JsonPropertyName("model")]
-        public string Model { get; set; } = "llama-3.3-70b-versatile";
+        public string Model { get; set; } = GroqConstants.DefaultModel;
 
         /// <summary>
         /// Conversation messages

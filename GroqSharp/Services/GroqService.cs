@@ -1,4 +1,5 @@
-﻿using GroqSharp.Models;
+﻿using GroqSharp.Core;
+using GroqSharp.Models;
 
 namespace GroqSharp.Services
 {
@@ -38,6 +39,11 @@ namespace GroqSharp.Services
         public async Task<List<string>> GetAvailableModelsAsync()
         {
             return await _groqClient.GetAvailableModelsAsync();
+        }
+
+        public async Task<string> GetDefaultModelAsync()
+        {
+            return await _groqClient.GetDefaultModelAsync();
         }
     }
 }

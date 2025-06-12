@@ -1,17 +1,21 @@
 # GroqSharp
 
-A .NET client library for interacting with Groq's API, providing easy access to their high-performance language models.
+GroqSharp is a modern, extensible .NET console application and SDK for interacting with Groq's LLMs. It supports structured prompts, command-based interaction, and file-based text extraction, all wrapped in a configurable and pluggable architecture.
+
 
 ![GroqSharp](https://github.com/user-attachments/assets/9d8caca6-d8ac-423e-aaea-fc942a811fed)
 
 ## Features
 
-- Simple and intuitive API for chat completions
-- Configuration management via `appsettings.json`
-- Interactive console interface
-- Model management (list available models, change current model)
-- Support for all Groq API parameters (temperature, max tokens, etc.)
-- Dependency Injection support
+- Interactive console with natural and command-based input
+- API key and model configuration via `appsettings.json`
+- File import support (`.pdf`, `.docx`, `.html`)
+- Dependency Injection ready
+- Chat history persistence
+- Export conversations to `.txt`
+- Switch models dynamically
+- Streaming and non-streaming chat modes
+- Slash commands for model management, help, and more
 
 ## Getting Started
 
@@ -30,6 +34,23 @@ When you first run the application:
 
 This creates an `appsettings.json` file with your configuration for future runs.
 
+## Configuration
+
+First-run setup creates `appsettings.json` with:
+
+```json
+json
+{
+  "Groq": {
+    "ApiKey": "your_api_key",
+    "BaseUrl": "https://api.groq.com/openai/v1/",
+    "DefaultModel": "llama-3.3-70b-versatile",
+    "DefaultTemperature": 0.7,
+    "DefaultMaxTokens": 1024
+  }
+}
+```
+
 ## Usage
 
 ### Interactive Console
@@ -37,11 +58,15 @@ This creates an `appsettings.json` file with your configuration for future runs.
 Run the application to enter an interactive chat session:
 
 Groq API Client Commands:
-- `/models` - Show available models
-- `/setmodel` - Change current model
-- `/stream` - Start a streaming chat session
-- `/exit` - Quit the application
-- `/help` - Show this help
+`/models`   - Show available models
+`/setmodel` - Change current model
+`/stream`   - Start a streaming chat session
+`/history`  - Show previous conversation messages
+`/clear`    - Clear the current session
+`/process`  - Process a local file
+`/export`   - Export AI output to file
+`/exit`     - Quit the application
+`/help`     - Show this help
 
 ```text
 You: [type your message here]
@@ -49,31 +74,41 @@ You: [type your message here]
 
 ### Programmatic Usage
 
+You can use GroqSharp in your own .NET applications as a library.
+
+### Register services
+
 ```csharp
-// Setup DI container
 var services = new ServiceCollection();
-services.AddSingleton<IConfiguration>(config);
-services.AddHttpClient<IGroqClient, GroqClient>(client =>
+services.AddGroqSharp(configuration); // configuration is an IConfiguration instance
+var provider = services.BuildServiceProvider();
+
+var groqService = provider.GetRequiredService<IGroqService>();
+```
+
+### Send a Chat Request
+
+```csharp
+var response = await groqService.CompleteChatAsync(new ChatRequest
 {
-    client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+    Messages = new List<Message>
+    {
+        new Message { Role = "user", Content = "Tell me a joke." }
+    },
+    Stream = false // or true for streaming
 });
-services.AddTransient<IGroqService, GroqService>();
 
-var serviceProvider = services.BuildServiceProvider();
-var groqService = serviceProvider.GetRequiredService<IGroqService>();
+Console.WriteLine(response?.Choices?.FirstOrDefault()?.Message?.Content);
+```
 
-// Simple completion
-var response = await groqService.GetChatCompletionAsync("Hello, how are you?");
+### List Available Models
 
-// Advanced completion with parameters
-var request = new ChatRequest
+```csharp
+var models = await groqService.GetAvailableModelsAsync();
+foreach (var model in models)
 {
-    Model = "llama-3.3-70b-versatile",
-    Messages = new[] { new Message { Role = "user", Content = "Explain quantum computing" } },
-    Temperature = 0.7,
-    MaxTokens = 1024
-};
-var advancedResponse = await groqService.GetChatCompletionAsync(request);
+    Console.WriteLine(model.Id);
+}
 ```
 
 ## Models
@@ -85,6 +120,61 @@ var models = await groqService.GetAvailableModelsAsync();
 ```
 
 Change the current model with `/setmodel` command or by updating the `DefaultModel` in `appsettings.json`.
+
+## Stream
+
+Start a streaming session:
+
+```text
+/stream
+```
+
+Type your message:
+
+```text
+You: Explain quantum computing in simple terms
+```
+
+See real-time response:
+
+```text
+AI: Quantum computing is like a super-powered computer that uses quantum bits...
+(text appears chunk by chunk)
+```
+
+End streaming:
+
+```text
+/end
+```
+
+## File Processing
+
+Supported file formats:
+
+- Text files (.txt)
+- Office documents (.docx)
+- PDF files (.pdf)
+- HTML files (.html)
+
+Example:
+
+```bash
+/process sample.pdf
+Process this content? (y/n): y
+Export this response? (y/n): y
+Enter output path: summary.txt
+```
+
+## Export
+
+AI output to export:
+
+```bash
+/export This is a sample request
+Enter output path (default extension .txt): C:\Temp\sample.txt
+Successfully exported to C:\Temp\sample.txt
+```
 
 ## Dependencies
 
