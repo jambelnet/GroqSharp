@@ -10,15 +10,17 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddGroqSharpCommands(this IServiceCollection services)
     {
+        services.AddTransient<ICommandProcessor, ArchiveCommandHandler>();
+        services.AddTransient<ICommandProcessor, ClearCommandHandler>();
         services.AddTransient<ICommandProcessor, ExitCommandHandler>();
         services.AddTransient<ICommandProcessor, ExportCommandHandler>();
         services.AddTransient<ICommandProcessor, HelpCommandHandler>();
+        services.AddTransient<ICommandProcessor, HistoryCommandHandler>();
         services.AddTransient<ICommandProcessor, ModelsCommandHandler>();
+        services.AddTransient<ICommandProcessor, NewCommandHandler>();
         services.AddTransient<ICommandProcessor, ProcessCommandHandler>();
         services.AddTransient<ICommandProcessor, SetModelCommandHandler>();
         services.AddTransient<ICommandProcessor, StreamCommandHandler>();
-        services.AddTransient<ICommandProcessor, HistoryCommandHandler>();
-        services.AddTransient<ICommandProcessor, ClearCommandHandler>();
 
         services.AddSingleton<CommandDispatcher>();
 

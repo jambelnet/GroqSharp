@@ -8,11 +8,12 @@ namespace GroqSharp.Commands.Models
         private readonly ConversationPersistenceService _persistence;
         public string SessionId { get; } = Guid.NewGuid().ToString();
         public IGroqService GroqService { get; set; }
-        public ConversationService Conversation { get; } = new();
+        public ConversationService Conversation { get; set; } = new();
         public string CurrentModel { get; set; }
         public Dictionary<string, object> State { get; } = new();
         public object PreviousCommandResult { get; set; }
         public bool ShouldExit { get; set; }
+        public string? LoadedArchiveFileName { get; set; }
 
         public CommandContext(ConversationPersistenceService persistence)
         {
@@ -44,7 +45,16 @@ namespace GroqSharp.Commands.Models
 
         public void SaveConversation()
         {
-            _persistence.SaveConversation(SessionId, Conversation.GetHistory().ToList());
+            var messages = Conversation.GetHistory().ToList();
+
+            if (!string.IsNullOrWhiteSpace(LoadedArchiveFileName))
+            {
+                _persistence.SaveConversation(LoadedArchiveFileName, messages);
+            }
+            else
+            {
+                _persistence.SaveConversation(messages); // fallback to new archive
+            }
         }
     }
 }

@@ -57,15 +57,17 @@ First-run setup creates `appsettings.json` with:
 Run the application to enter an interactive chat session:
 
 Groq API Client Commands:
-- `/models`   - Show available models
-- `/setmodel` - Change current model
-- `/stream`   - Start a streaming chat session
-- `/history`  - Show previous conversation messages
-- `/clear`    - Clear the current session
-- `/process`  - Process a local file
-- `/export`   - Export AI output to file
-- `/exit`     - Quit the application
-- `/help`     - Show this help
+- `/models`    - Show available models
+- `/setmodel`  - Change current model
+- `/stream`    - Start a streaming chat session
+- `/history`   - Show previous conversation messages
+- `/clear`     - Clear the current session
+- `/archive`   - Manage saved conversations (list, load, delete, rename)
+- `/new`       - Start a new chat session (autosaves previous)
+- `/process`   - Process a local file
+- `/export`    - Export AI output to file
+- `/exit`      - Quit the application
+- `/help`      - Show this help
 
 ```text
 You: [type your message here]
@@ -146,6 +148,35 @@ End streaming:
 ```text
 /end
 ```
+
+## Conversation Archives
+
+GroqSharp autosaves your sessions to disk in the background using identifiable filenames like:
+
+```text
+write-a-song__a1b2c3d4.json
+```
+
+Use the `/archive` command to manage them:
+
+| Command                      | Description                           |
+|------------------------------|---------------------------------------|
+| `/archive list`              | List all saved conversations          |
+| `/archive load 1`            | Load a conversation by index or name  |
+| `/archive delete 2`          | Delete a saved conversation           |
+| `/archive rename 3 new-name` | Rename the archive while keeping ID   |
+
+Each archive is identified by the first few words of the first message, followed by a short unique ID.
+
+## Starting a New Chat
+
+Use `/new` to start a fresh chat session at any time:
+
+```text
+/new
+```
+
+GroqSharp will automatically save the current conversation before resetting the session. This keeps your archive organized without asking for confirmation.
 
 ## File Processing
 
