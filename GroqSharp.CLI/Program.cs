@@ -87,7 +87,7 @@ class Program
     {
         var tempSettings = new GroqConfiguration
         {
-            DefaultModel = GroqConstants.DefaultModel
+            DefaultModel = ConversationService.DefaultModel
         };
 
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -141,7 +141,7 @@ class Program
 
         var selectedModel = int.TryParse(modelInput, out var num) && num > 0 && num <= availableModels.Count
             ? availableModels[num - 1]
-            : GroqConstants.DefaultModel;
+            : ConversationService.DefaultModel;
 
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("\nConfigure advanced parameters (press Enter for defaults):");
@@ -238,7 +238,7 @@ class Program
 
             var request = new ChatRequest
             {
-                Model = context.CurrentModel ?? GroqConstants.DefaultModel,
+                Model = context.CurrentModel ?? ConversationService.DefaultModel,
                 Messages = context.Conversation.GetApiMessages(),
                 Temperature = 0.7
             };

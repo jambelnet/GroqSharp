@@ -1,6 +1,7 @@
 ﻿using GroqSharp.Commands.Interfaces;
 using GroqSharp.Commands.Models;
 using GroqSharp.Models;
+using GroqSharp.Services;
 using System.Text;
 
 namespace GroqSharp.Commands.Handlers
@@ -27,7 +28,7 @@ namespace GroqSharp.Commands.Handlers
                 {
                     var request = new ChatRequest
                     {
-                        Model = context.CurrentModel ?? GroqConstants.DefaultModel,
+                        Model = context.CurrentModel ?? ConversationService.DefaultModel,
                         Messages = new[] { new Message { Role = "user", Content = streamInput } },
                         Stream = true
                     };

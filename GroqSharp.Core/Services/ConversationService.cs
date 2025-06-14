@@ -7,6 +7,9 @@ namespace GroqSharp.Services
         private readonly List<Message> _messages = new();
         private readonly int _maxHistoryLength;
 
+        public const string DefaultModel = "llama-3.3-70b-versatile";
+        public string CurrentModel { get; set; } = DefaultModel;
+
         public ConversationService(int maxHistoryLength = 10)
         {
             _maxHistoryLength = maxHistoryLength;
