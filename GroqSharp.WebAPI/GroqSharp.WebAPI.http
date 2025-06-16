@@ -1,6 +1,6 @@
 @GroqSharp.WebAPI_HostAddress = http://localhost:5070
 
-GET {{GroqSharp.WebAPI_HostAddress}}/weatherforecast/
+GET {{GroqSharp.WebAPI_HostAddress}}/api/model/list/
 Accept: application/json
 
 ###

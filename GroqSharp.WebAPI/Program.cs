@@ -11,7 +11,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddGroqSharpCore(builder.Configuration);
 builder.Services.AddSingleton<ConversationPersistenceService>();
-builder.Services.AddScoped<ConversationService>();
+//builder.Services.AddScoped<ConversationService>();
+// Register as singleton to maintain conversation state
+builder.Services.AddSingleton<ConversationService>();
+// Add session support
+//builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddSession(options =>
+//{
+//    options.IdleTimeout = TimeSpan.FromMinutes(30);
+//    options.Cookie.HttpOnly = true;
+//    options.Cookie.IsEssential = true;
+//});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>

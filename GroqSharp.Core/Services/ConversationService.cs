@@ -6,23 +6,27 @@ namespace GroqSharp.Services
     {
         private readonly List<Message> _messages = new();
         private readonly int _maxHistoryLength;
+        private readonly object _lock = new();
 
         public const string DefaultModel = "llama-3.3-70b-versatile";
         public string CurrentModel { get; set; } = DefaultModel;
 
-        public ConversationService(int maxHistoryLength = 10)
+        public ConversationService(int maxHistoryLength = 100)
         {
             _maxHistoryLength = maxHistoryLength;
         }
 
         public void AddMessage(string role, string content)
         {
-            _messages.Add(new Message { Role = role, Content = content });
-
-            // Trim oldest messages if over limit
-            while (_messages.Count > _maxHistoryLength)
+            lock (_lock)
             {
-                _messages.RemoveAt(0);
+                _messages.Add(new Message { Role = role, Content = content });
+
+                // Trim oldest messages if over limit
+                while (_messages.Count > _maxHistoryLength)
+                {
+                    _messages.RemoveAt(0);
+                }
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace GroqSharp.Models
 {
-    public class ChatRequest
+    public record ChatRequest
     {
         /// <summary>
         /// ID of the model to use (default: llama-3.3-70b-versatile)

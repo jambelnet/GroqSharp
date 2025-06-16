@@ -8,7 +8,6 @@ namespace GroqSharp.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/chat")]
-    //[Produces("application/json")]
     public class ChatController : ControllerBase
     {
         private readonly IGroqService _groqService;
@@ -48,7 +47,19 @@ namespace GroqSharp.WebAPI.Controllers
         {
             try
             {
-                return Ok(_conversation.GetHistory());
+                //var sessionId = HttpContext.Session.Id;
+
+                var history = _conversation.GetHistory().Select(m => new {
+                    Role = m.Role,
+                    Content = m.Content,
+                    Timestamp = DateTime.UtcNow // Optional: add timestamp if needed
+                });
+
+                return Ok(new
+                {
+                    Model = _conversation.CurrentModel,
+                    Messages = history
+                });
             }
             catch (Exception ex)
             {
