@@ -25,7 +25,7 @@ namespace GroqSharp.WebAPI.Controllers
         [HttpPost("load")]
         public IActionResult Load([FromBody] ArchiveDto dto)
         {
-            if (_persistence.TryLoadArchive(dto.ArchiveId, out var conversation, out _))
+            if (_persistence.TryLoadArchive(dto.Id, out var conversation, out _))
                 return Ok(conversation.GetHistory());
 
             return NotFound("Archive not found");
@@ -34,10 +34,10 @@ namespace GroqSharp.WebAPI.Controllers
         [HttpPost("rename")]
         public IActionResult Rename([FromBody] ArchiveDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.NewName))
+            if (string.IsNullOrWhiteSpace(dto.Title))
                 return BadRequest("New name is required");
 
-            if (_persistence.RenameArchive(dto.ArchiveId, dto.NewName))
+            if (_persistence.RenameArchive(dto.Id, dto.Title))
                 return Ok("Archive renamed");
 
             return BadRequest("Rename failed");
@@ -46,7 +46,7 @@ namespace GroqSharp.WebAPI.Controllers
         [HttpDelete]
         public IActionResult Delete([FromBody] ArchiveDto dto)
         {
-            if (_persistence.DeleteArchive(dto.ArchiveId))
+            if (_persistence.DeleteArchive(dto.Id))
                 return Ok("Archive deleted");
 
             return NotFound("Archive not found");

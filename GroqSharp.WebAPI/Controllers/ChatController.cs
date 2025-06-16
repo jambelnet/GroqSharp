@@ -8,6 +8,7 @@ namespace GroqSharp.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/chat")]
+    //[Produces("application/json")]
     public class ChatController : ControllerBase
     {
         private readonly IGroqService _groqService;
@@ -19,33 +20,54 @@ namespace GroqSharp.WebAPI.Controllers
             _conversation = conversation;
         }
 
-        [HttpPost]
+        [HttpPost("send")]
         public async Task<IActionResult> SendMessage([FromBody] ChatRequestDto request)
         {
-            _conversation.AddMessage("user", request.Message);
-
-            var response = await _groqService.GetChatCompletionAsync(new ChatRequest
+            try
             {
-                Messages = _conversation.GetApiMessages(),
-                Model = _conversation.CurrentModel,
-                Stream = request.Stream
-            });
+                _conversation.AddMessage("user", request.Message);
 
-            _conversation.AddMessage("assistant", response);
-            return Ok(response);
+                var response = await _groqService.GetChatCompletionAsync(new ChatRequest
+                {
+                    Messages = _conversation.GetApiMessages(),
+                    Model = _conversation.CurrentModel,
+                    Stream = request.Stream
+                });
+
+                _conversation.AddMessage("assistant", response);
+                return Ok(new { Content = response });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
 
         [HttpGet("history")]
         public IActionResult GetHistory()
         {
-            return Ok(_conversation.GetHistory());
+            try
+            {
+                return Ok(_conversation.GetHistory());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
 
         [HttpPost("reset")]
         public IActionResult Reset()
         {
-            _conversation.LoadMessages([]);
-            return Ok("Conversation reset.");
+            try
+            {
+                _conversation.LoadMessages([]);
+                return Ok(new { Message = "Conversation reset." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
     }
 }

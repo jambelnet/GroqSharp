@@ -1,5 +1,6 @@
 ﻿using GroqSharp.Commands.Interfaces;
 using GroqSharp.Commands.Models;
+using GroqSharp.Models;
 using GroqSharp.Services;
 
 namespace GroqSharp.Commands.Handlers
@@ -82,11 +83,12 @@ namespace GroqSharp.Commands.Handlers
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/archive" };
 
-        private void PrintArchiveList(List<(string Id, string Title)> archives)
+        private void PrintArchiveList(List<Archive> archives)
         {
             for (int i = 0; i < archives.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. [{archives[i].Id}] {archives[i].Title}");
+                Console.WriteLine($"   Preview: {archives[i].Preview}");
             }
         }
     }

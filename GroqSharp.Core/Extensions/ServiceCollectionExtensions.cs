@@ -4,25 +4,26 @@ using GroqSharp.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GroqSharp.Extensions;
-
-public static class ServiceCollectionExtensions
+namespace GroqSharp.Extensions
 {
-    public static IServiceCollection AddGroqSharpCore(
-        this IServiceCollection services,
-        IConfiguration config)
+    public static class ServiceCollectionExtensions
     {
-        services.AddSingleton(config);
-        services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
-        services.AddSingleton<ConversationService>(_ => new ConversationService(10));
-
-        services.AddHttpClient<IGroqClient, GroqClient>(client =>
+        public static IServiceCollection AddGroqSharpCore(
+            this IServiceCollection services,
+            IConfiguration config)
         {
-            client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-        });
+            services.AddSingleton(config);
+            services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
+            services.AddSingleton<ConversationService>(_ => new ConversationService(10));
 
-        services.AddTransient<IGroqService, GroqService>();
+            services.AddHttpClient<IGroqClient, GroqClient>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
 
-        return services;
+            services.AddTransient<IGroqService, GroqService>();
+
+            return services;
+        }
     }
 }

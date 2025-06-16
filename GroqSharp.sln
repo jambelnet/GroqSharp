@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GroqSharp.CLI", "GroqSharp.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GroqSharp.Core", "GroqSharp.Core\GroqSharp.Core.csproj", "{BD0ACF97-A99F-4C79-9FD2-406A4B6DC9BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroqSharp.WebAPI", "GroqSharp.WebAPI\GroqSharp.WebAPI.csproj", "{9D3879B0-9835-4B6E-BB99-15741916FDB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GroqSharp.WebAPI", "GroqSharp.WebAPI\GroqSharp.WebAPI.csproj", "{9D3879B0-9835-4B6E-BB99-15741916FDB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

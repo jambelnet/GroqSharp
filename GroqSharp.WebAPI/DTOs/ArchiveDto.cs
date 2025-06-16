@@ -2,7 +2,7 @@
 {
     public class ArchiveDto
     {
-        public string ArchiveId { get; set; } = string.Empty;
-        public string NewName { get; set; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
     }
 }

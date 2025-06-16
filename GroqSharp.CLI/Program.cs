@@ -1,5 +1,4 @@
-﻿using GroqSharp;
-using GroqSharp.CLI.Services;
+﻿using GroqSharp.CLI.Services;
 using GroqSharp.Commands.Models;
 using GroqSharp.Core;
 using GroqSharp.Extensions;
@@ -8,7 +7,6 @@ using GroqSharp.Models;
 using GroqSharp.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 class Program
