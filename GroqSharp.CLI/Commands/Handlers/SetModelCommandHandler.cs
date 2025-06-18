@@ -1,9 +1,9 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace GroqSharp.Commands.Handlers
+namespace GroqSharp.CLI.Commands.Handlers
 {
     public class SetModelCommandHandler : ICommandProcessor
     {

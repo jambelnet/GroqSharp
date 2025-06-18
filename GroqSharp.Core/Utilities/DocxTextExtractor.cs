@@ -1,6 +1,6 @@
 ﻿using Xceed.Words.NET;
 
-namespace GroqSharp.Utilities
+namespace GroqSharp.Core.Utilities
 {
     public static class DocxTextExtractor
     {

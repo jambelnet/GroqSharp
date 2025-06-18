@@ -1,29 +1,27 @@
-using GroqSharp.Extensions;
-using GroqSharp.Services;
+using GroqSharp.Core.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Groq services
 builder.Services.AddGroqSharpCore(builder.Configuration);
-builder.Services.AddSingleton<ConversationPersistenceService>();
-//builder.Services.AddScoped<ConversationService>();
-// Register as singleton to maintain conversation state
-builder.Services.AddSingleton<ConversationService>();
+
+// Add distributed memory cache (required for session)
+builder.Services.AddDistributedMemoryCache();
+
 // Add session support
-//builder.Services.AddDistributedMemoryCache();
-//builder.Services.AddSession(options =>
-//{
-//    options.IdleTimeout = TimeSpan.FromMinutes(30);
-//    options.Cookie.HttpOnly = true;
-//    options.Cookie.IsEssential = true;
-//});
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -40,9 +38,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
+app.UseSession(); // Use after UseRouting but before UseEndpoints if you use them
 app.MapControllers();
-
 app.Run();

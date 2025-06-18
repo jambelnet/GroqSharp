@@ -1,7 +1,7 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Models;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
 
-namespace GroqSharp.Services
+namespace GroqSharp.Core.Services
 {
     public class GroqService : IGroqService
     {

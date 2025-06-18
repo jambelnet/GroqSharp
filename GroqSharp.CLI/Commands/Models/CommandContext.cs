@@ -1,28 +1,49 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Services;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Services;
+using GroqSharp.Core.Services.Interfaces;
 
-namespace GroqSharp.Commands.Models
+namespace GroqSharp.CLI.Commands.Models
 {
     public class CommandContext
     {
-        private readonly ConversationPersistenceService _persistence;
-        public string SessionId { get; } = Guid.NewGuid().ToString();
+        private readonly IGlobalConversationService _conversationService;
         public IGroqService GroqService { get; set; }
-        public ConversationService Conversation { get; set; } = new();
+        public ConversationService Conversation { get; private set; }
         public string CurrentModel { get; set; }
-        public Dictionary<string, object> State { get; } = new();
+        public string CurrentTitle { get; private set; }
         public object PreviousCommandResult { get; set; }
+        public string SessionId { get; private set; }
         public bool ShouldExit { get; set; }
-        public string? LoadedArchiveFileName { get; set; }
 
-        public CommandContext(ConversationPersistenceService persistence)
+        public CommandContext(IGlobalConversationService conversationService, ConversationService conversation)
         {
-            _persistence = persistence;
-            Conversation = new ConversationService();
-            var loadedMessages = persistence.LoadConversation(SessionId);
-            if (loadedMessages != null)
+            _conversationService = conversationService;
+            Conversation = conversation;
+            //SessionId = Guid.NewGuid().ToString();
+        }
+
+
+        public async Task InitializeSession(string sessionId, string title = null)
+        {
+            SessionId = sessionId;
+            var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
+            Conversation = session.Conversation;
+            CurrentTitle = title ?? session.Title;
+        }
+
+        public async Task SaveConversation()
+        {
+            if (Conversation != null && !string.IsNullOrEmpty(SessionId))
             {
-                Conversation.LoadMessages(loadedMessages);
+                await _conversationService.SaveSessionAsync(SessionId);
+            }
+        }
+
+        public async Task RenameConversation(string newTitle)
+        {
+            if (await _conversationService.RenameConversationAsync(SessionId, newTitle))
+            {
+                CurrentTitle = newTitle;
             }
         }
 
@@ -41,20 +62,6 @@ namespace GroqSharp.Commands.Models
             Console.Write(message);
             Console.ResetColor();
             return Console.ReadLine()?.Equals("y", StringComparison.OrdinalIgnoreCase) ?? false;
-        }
-
-        public void SaveConversation()
-        {
-            var messages = Conversation.GetHistory().ToList();
-
-            if (!string.IsNullOrWhiteSpace(LoadedArchiveFileName))
-            {
-                _persistence.SaveConversation(LoadedArchiveFileName, messages);
-            }
-            else
-            {
-                _persistence.SaveConversation(messages); // fallback to new archive
-            }
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using GroqSharp.Models;
+﻿using GroqSharp.Core.Models;
 
-namespace GroqSharp.Core
+namespace GroqSharp.Core.Interfaces
 {
     public interface IGroqService
     {

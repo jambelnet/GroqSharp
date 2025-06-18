@@ -1,5 +1,5 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
 using System.Text;
 
 namespace GroqSharp.CLI.Services

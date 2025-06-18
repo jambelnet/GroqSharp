@@ -1,6 +1,6 @@
-﻿using GroqSharp.Commands.Models;
+﻿using GroqSharp.CLI.Commands.Models;
 
-namespace GroqSharp.Commands.Interfaces
+namespace GroqSharp.CLI.Commands.Interfaces
 {
     public interface ICommandProcessor
     {

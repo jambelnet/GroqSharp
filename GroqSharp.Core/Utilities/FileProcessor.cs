@@ -2,7 +2,7 @@
 using iText.Kernel.Pdf;
 using System.Text.Json;
 
-namespace GroqSharp.Utilities
+namespace GroqSharp.Core.Utilities
 {
     public static class FileProcessor
     {

@@ -1,7 +1,7 @@
 ﻿using iText.Kernel.Pdf;
 using System.Text;
 
-namespace GroqSharp.Utilities
+namespace GroqSharp.Core.Utilities
 {
     public static class PdfTextExtractor
     {

@@ -1,10 +1,10 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
-using GroqSharp.Models;
-using GroqSharp.Services;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Models;
+using GroqSharp.Core.Services;
 using System.Text;
 
-namespace GroqSharp.Commands.Handlers
+namespace GroqSharp.CLI.Commands.Handlers
 {
     public class StreamCommandHandler : ICommandProcessor
     {

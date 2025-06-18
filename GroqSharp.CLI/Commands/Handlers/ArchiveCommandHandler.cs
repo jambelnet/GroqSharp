@@ -1,17 +1,17 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
-using GroqSharp.Models;
-using GroqSharp.Services;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Services.Interfaces;
+using GroqSharp.Core.Services.Models;
 
-namespace GroqSharp.Commands.Handlers
+namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ArchiveCommandHandler : ICommandProcessor
     {
-        private readonly ConversationPersistenceService _persistence;
+        private readonly IGlobalConversationService _conversationService;
 
-        public ArchiveCommandHandler(ConversationPersistenceService persistence)
+        public ArchiveCommandHandler(IGlobalConversationService conversationService)
         {
-            _persistence = persistence;
+            _conversationService = conversationService;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
@@ -26,7 +26,7 @@ namespace GroqSharp.Commands.Handlers
             }
 
             var subCommand = args[0].ToLowerInvariant();
-            var archives = _persistence.ListArchives();
+            var archives = await _conversationService.ListAllConversationsAsync();
 
             switch (subCommand)
             {
@@ -37,40 +37,40 @@ namespace GroqSharp.Commands.Handlers
                 case "load":
                     if (args.Length < 2)
                     {
-                        Console.WriteLine("Specify archive index or ID to load.");
+                        Console.WriteLine("Specify archive ID to load.");
                         break;
                     }
-                    if (_persistence.TryLoadArchive(args[1], out var loaded, out var fileName))
-                    {
-                        context.Conversation = loaded;
-                        context.LoadedArchiveFileName = fileName;
-                        Console.WriteLine("Archive loaded.");
-                    }
-                    else Console.WriteLine("Archive not found.");
+                    var session = await _conversationService.GetOrCreateSessionAsync(args[1]);
+                    await context.InitializeSession(args[1], session.Title);
+                    Console.WriteLine($"Loaded conversation: {session.Title}");
                     break;
 
                 case "delete":
                     if (args.Length < 2)
                     {
-                        Console.WriteLine("Specify archive index or ID to delete.");
+                        Console.WriteLine("Specify archive ID to delete.");
                         break;
                     }
-                    if (_persistence.DeleteArchive(args[1]))
-                        Console.WriteLine("Archive deleted.");
+                    if (await _conversationService.DeleteConversationAsync(args[1]))
+                    {
+                        Console.WriteLine("Conversation deleted.");
+                    }
                     else
-                        Console.WriteLine("Archive not found.");
+                    {
+                        Console.WriteLine("Conversation not found.");
+                    }
                     break;
 
                 case "rename":
                     if (args.Length < 3)
                     {
-                        Console.WriteLine("Usage: /archive rename [id/index] [new name]");
+                        Console.WriteLine("Usage: /archive rename [id] [new name]");
                         break;
                     }
-                    if (_persistence.RenameArchive(args[1], args[2]))
-                        Console.WriteLine("Archive renamed.");
+                    if (await _conversationService.RenameConversationAsync(args[1], args[2]))
+                        Console.WriteLine("Conversation renamed.");
                     else
-                        Console.WriteLine("Archive not found or rename failed.");
+                        Console.WriteLine("Conversation not found or rename failed.");
                     break;
 
                 default:
@@ -83,11 +83,12 @@ namespace GroqSharp.Commands.Handlers
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/archive" };
 
-        private void PrintArchiveList(List<Archive> archives)
+        private void PrintArchiveList(List<ConversationMeta> archives)
         {
             for (int i = 0; i < archives.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. [{archives[i].Id}] {archives[i].Title}");
+                Console.WriteLine($"{i + 1}. [{archives[i].SessionId}] {archives[i].Title}");
+                Console.WriteLine($"   Last Modified: {archives[i].LastModified}");
                 Console.WriteLine($"   Preview: {archives[i].Preview}");
             }
         }

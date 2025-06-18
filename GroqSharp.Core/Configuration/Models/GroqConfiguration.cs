@@ -1,4 +1,4 @@
-﻿namespace GroqSharp.Models
+﻿namespace GroqSharp.Core.Configuration.Models
 {
     public class GroqConfiguration
     {

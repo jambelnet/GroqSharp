@@ -1,10 +1,11 @@
-﻿using GroqSharp.CLI.Services;
-using GroqSharp.Commands.Handlers;
-using GroqSharp.Commands.Interfaces;
+﻿using GroqSharp.CLI.Commands.Handlers;
+using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Services;
+using GroqSharp.Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GroqSharp.Extensions
+namespace GroqSharp.CLI.Extensions
 {
     public static class ServiceCollectionExtensions
     {

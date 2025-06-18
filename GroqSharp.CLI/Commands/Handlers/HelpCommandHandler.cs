@@ -1,7 +1,7 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
 
-namespace GroqSharp.Commands.Handlers
+namespace GroqSharp.CLI.Commands.Handlers
 {
     public class HelpCommandHandler : ICommandProcessor
     {

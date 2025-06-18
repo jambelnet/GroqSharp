@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using GroqSharp.Models;
-using GroqSharp.Interfaces;
+﻿using GroqSharp.Core.Configuration.Interfaces;
+using GroqSharp.Core.Configuration.Models;
+using Microsoft.Extensions.Configuration;
 
-namespace GroqSharp.Services
+namespace GroqSharp.Core.Configuration.Services
 {
     public class GroqConfigurationService : IGroqConfigurationService
     {

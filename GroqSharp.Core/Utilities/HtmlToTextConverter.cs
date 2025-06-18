@@ -1,6 +1,6 @@
 ﻿using HtmlAgilityPack;
 
-namespace GroqSharp.Utilities
+namespace GroqSharp.Core.Utilities
 {
     public static class HtmlToTextConverter
     {

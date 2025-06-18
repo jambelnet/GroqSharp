@@ -1,84 +1,50 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Models;
-using GroqSharp.Services;
-using GroqSharp.WebAPI.DTOs;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
+using GroqSharp.Core.Services.Interfaces;
+using GroqSharp.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroqSharp.WebAPI.Controllers
 {
     [ApiController]
-    [Route("api/chat")]
+    [Route("api/conversations/{sessionId}/chat")]
     public class ChatController : ControllerBase
     {
+        private readonly IGlobalConversationService _conversationService;
         private readonly IGroqService _groqService;
-        private readonly ConversationService _conversation;
+        private readonly IConfiguration _config;
 
-        public ChatController(IGroqService groqService, ConversationService conversation)
+        public ChatController(
+            IGlobalConversationService conversationService,
+            IGroqService groqService,
+            IConfiguration config)
         {
+            _conversationService = conversationService;
             _groqService = groqService;
-            _conversation = conversation;
+            _config = config;
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] ChatRequestDto request)
+        [HttpPost("messages")]
+        public async Task<IActionResult> SendMessage(string sessionId, [FromBody] Message userMessage)
         {
-            try
-            {
-                _conversation.AddMessage("user", request.Message);
+            if (string.IsNullOrWhiteSpace(userMessage?.Content))
+                return BadRequest("Message content cannot be empty.");
 
-                var response = await _groqService.GetChatCompletionAsync(new ChatRequest
-                {
-                    Messages = _conversation.GetApiMessages(),
-                    Model = _conversation.CurrentModel,
-                    Stream = request.Stream
-                });
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
 
-                _conversation.AddMessage("assistant", response);
-                return Ok(new { Content = response });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
-        }
+            sessionContext.Conversation.AddMessage("user", userMessage.Content);
 
-        [HttpGet("history")]
-        public IActionResult GetHistory()
-        {
-            try
+            var response = await _groqService.GetChatCompletionAsync(new ChatRequest
             {
-                //var sessionId = HttpContext.Session.Id;
+                Model = sessionContext.Conversation.CurrentModel,
+                Messages = sessionContext.Conversation.GetApiMessages(),
+                Temperature = double.TryParse(_config["Groq:DefaultTemperature"], out var temp) ? temp : 0.7
+            });
 
-                var history = _conversation.GetHistory().Select(m => new {
-                    Role = m.Role,
-                    Content = m.Content,
-                    Timestamp = DateTime.UtcNow // Optional: add timestamp if needed
-                });
+            sessionContext.Conversation.AddMessage("assistant", response);
+            await _conversationService.SaveSessionAsync(sessionId);
 
-                return Ok(new
-                {
-                    Model = _conversation.CurrentModel,
-                    Messages = history
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
-        }
-
-        [HttpPost("reset")]
-        public IActionResult Reset()
-        {
-            try
-            {
-                _conversation.LoadMessages([]);
-                return Ok(new { Message = "Conversation reset." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
+            return Ok(new { response });
         }
     }
 }

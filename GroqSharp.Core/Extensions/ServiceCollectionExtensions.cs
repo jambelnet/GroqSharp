@@ -1,10 +1,13 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Interfaces;
-using GroqSharp.Services;
+﻿using GroqSharp.Core.Configuration.Interfaces;
+using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Configuration.Services;
+using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Services;
+using GroqSharp.Core.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GroqSharp.Extensions
+namespace GroqSharp.Core.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -13,8 +16,12 @@ namespace GroqSharp.Extensions
             IConfiguration config)
         {
             services.AddSingleton(config);
+
             services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
-            services.AddSingleton<ConversationService>(_ => new ConversationService(10));
+            services.Configure<GroqConfiguration>(config.GetSection("Groq"));
+
+            services.AddSingleton<IGlobalConversationService, GlobalConversationService>();
+            services.AddScoped<ConversationService>();
 
             services.AddHttpClient<IGroqClient, GroqClient>(client =>
             {

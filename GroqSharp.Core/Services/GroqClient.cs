@@ -1,13 +1,14 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Interfaces;
-using GroqSharp.Models;
+﻿using GroqSharp.Core.Configuration.Interfaces;
+using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GroqSharp.Services
+namespace GroqSharp.Core.Services
 {
     public class GroqClient : IGroqClient
     {

@@ -1,8 +1,8 @@
-﻿using GroqSharp.Commands.Interfaces;
-using GroqSharp.Commands.Models;
-using GroqSharp.Utilities;
+﻿using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Utilities;
 
-namespace GroqSharp.Commands.Handlers
+namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ExportCommandHandler : ICommandProcessor
     {

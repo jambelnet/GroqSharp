@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace GroqSharp.Models
+namespace GroqSharp.Core.Models
 {
     public record ChatRequest
     {

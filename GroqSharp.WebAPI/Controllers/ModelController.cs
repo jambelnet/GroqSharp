@@ -1,5 +1,6 @@
-﻿using GroqSharp.Core;
-using GroqSharp.Services;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Services;
+using GroqSharp.WebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroqSharp.WebAPI.Controllers
@@ -25,10 +26,17 @@ namespace GroqSharp.WebAPI.Controllers
         }
 
         [HttpPost("set")]
-        public IActionResult SetModel([FromBody] string model)
+        public async Task<IActionResult> SetModel([FromBody] SetModelRequest request)
         {
-            _conversation.CurrentModel = model;
-            return Ok($"Model set to {model}");
+            if (string.IsNullOrWhiteSpace(request.Model))
+                return BadRequest("Model value is required.");
+
+            var availableModels = await _groqService.GetAvailableModelsAsync();
+            if (!availableModels.Contains(request.Model))
+                return NotFound($"Model '{request.Model}' is not available.");
+
+            _conversation.CurrentModel = request.Model;
+            return Ok($"Model set to {request.Model}");
         }
     }
 }
