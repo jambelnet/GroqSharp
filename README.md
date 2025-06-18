@@ -1,38 +1,45 @@
 # GroqSharp
 
-GroqSharp is a modern, extensible .NET console application and SDK for interacting with Groq's LLMs. It supports structured prompts, command-based interaction, and file-based text extraction, all wrapped in a configurable and pluggable architecture.
-
+GroqSharp is a modern, extensible .NET console and Web API application for interacting with Groq's LLMs. It supports structured prompts, command-based interaction, file-based text extraction, and HTTP-based chat, all wrapped in a pluggable architecture.
 
 ![GroqSharp](https://github.com/user-attachments/assets/9d8caca6-d8ac-423e-aaea-fc942a811fed)
 
 ## Features
 
-- Interactive console with natural and command-based input
+- Interactive console with natural and command-based input (CLI)
+- HTTP-based Web API for headless or frontend integration (Web API)
 - API key and model configuration via `appsettings.json`
-- File import support (`.pdf`, `.docx`, `.html`)
-- Dependency Injection ready
-- Chat history persistence
-- Export conversations to `.txt`
+- File import support (`.pdf`, `.docx`, `.html`) (CLI)
+- Conversation history autosave and archive (CLI & Web API)
+- Export conversations (CLI)
 - Switch models dynamically
-- Streaming and non-streaming chat modes
-- Slash commands for model management, help, and more
+- Slash commands (CLI) and REST endpoints (Web API)
+- Dependency Injection and modular architecture
 
 ## Getting Started
 
-1. Clone or download the GroqSharp repository
-2. Add the source files to your .NET project
-3. Run the application - it will guide you through initial setup
+### CLI Setup
 
-## Initial Setup
+1. Clone the repository
+2. Run the console project (`GroqSharp.CLI`)
+3. Follow the guided setup to configure your Groq API key and model
 
-When you first run the application:
+### Web API Setup
+
+1. Start `GroqSharp.WebAPI` project
+2. Use tools like [Postman](https://www.postman.com/) or [curl](https://curl.se/) to send HTTP requests
+3. No extra configuration is needed if `appsettings.json` is pre-generated from CLI or manually created
+
+## Initial Setup (CLI)
+
+When you first run the CLI:
 
 1. You'll be prompted to enter your Groq API key (get it from [Groq Console](https://console.groq.com/keys))
-2. Set the base URL (defaults to `https://api.groq.com/openai/v1/`)
+2. Optionally set base URL (defaults to `https://api.groq.com/openai/v1/`)
 3. Select a default model from the available options
 4. Configure advanced parameters (temperature, max tokens)
 
-This creates an `appsettings.json` file with your configuration for future runs.
+This creates an `appsettings.json` file for future runs.
 
 ## Configuration
 
@@ -50,44 +57,78 @@ First-run setup creates `appsettings.json` with:
 }
 ```
 
-## Usage
+## Web API Endpoints
 
-### Interactive Console
+`POST /api/conversations/{sessionId}/chat/messages`
 
-Run the application to enter an interactive chat session:
+```json
+{
+  "role": "user",
+  "content": "What's the capital of Japan?"
+}
+```
 
-Groq API Client Commands:
+```json
+{
+  "response": "The capital of Japan is Tokyo."
+}
+```
+
+`GET /api/conversations/{sessionId}/history`
+
+Returns full chat history for a session.
+
+`DELETE /api/conversations/{sessionId}`
+
+Deletes an archived session (if saved).
+
+`POST /api/model/set`
+
+```json
+{
+  "model": "llama-3.3-70b-versatile"
+}
+```
+
+`GET /api/model/list`
+
+Returns available models from Groq API.
+
+## CLI Commands
+
+Launch the CLI app and use these commands:
+
+**GroqSharp CLI Commands:**
+
 - `/models`    - Show available models
 - `/setmodel`  - Change current model
-- `/stream`    - Start a streaming chat session
-- `/history`   - Show previous conversation messages
-- `/clear`     - Clear the current session
-- `/archive`   - Manage saved conversations (list, load, delete, rename)
-- `/new`       - Start a new chat session (autosaves previous)
-- `/process`   - Process a local file
-- `/export`    - Export AI output to file
+- `/stream`    - Start streaming chat
+- `/history`   - Show conversation history
+- `/clear`     - Clear session memory
+- `/archive`   - List/load/delete/rename conversations
+- `/new`       - Start a new chat session
+- `/process`   - Import and analyze a file
+- `/export`    - Save AI output to a file
 - `/exit`      - Quit the application
-- `/help`      - Show this help
+- `/help`      - Show help
 
 ```text
 You: [type your message here]
 ```
 
-### Programmatic Usage
-
-You can use GroqSharp in your own .NET applications as a library.
+## Programmatic Usage (Library)
 
 ### Register services
 
 ```csharp
 var services = new ServiceCollection();
-services.AddGroqSharp(configuration); // configuration is an IConfiguration instance
+services.AddGroqSharp(configuration); // IConfiguration instance
 var provider = services.BuildServiceProvider();
 
 var groqService = provider.GetRequiredService<IGroqService>();
 ```
 
-### Send a Chat Request
+### Chat Request Example
 
 ```csharp
 var response = await groqService.CompleteChatAsync(new ChatRequest
@@ -95,10 +136,8 @@ var response = await groqService.CompleteChatAsync(new ChatRequest
     Messages = new List<Message>
     {
         new Message { Role = "user", Content = "Tell me a joke." }
-    },
-    Stream = false // or true for streaming
+    }
 });
-
 Console.WriteLine(response?.Choices?.FirstOrDefault()?.Message?.Content);
 ```
 
@@ -111,16 +150,6 @@ foreach (var model in models)
     Console.WriteLine(model.Id);
 }
 ```
-
-## Models
-
-List available models with `/models` command or programmatically:
-
-```csharp
-var models = await groqService.GetAvailableModelsAsync();
-```
-
-Change the current model with `/setmodel` command or by updating the `DefaultModel` in `appsettings.json`.
 
 ## Stream
 
@@ -151,22 +180,50 @@ End streaming:
 
 ## Conversation Archives
 
-GroqSharp autosaves your sessions to disk in the background using identifiable filenames like:
+GroqSharp automatically saves your chat sessions as JSON files in the background. These are stored in the following folder:
+
+`%APPDATA%\GroqSharp\global_conversations\`
+
+💡 Archives are saved under `%APPDATA%\GroqSharp\global_conversations\` on Windows.
+On Linux/macOS, it's typically `~/.config/GroqSharp/global_conversations/`.
+
+Each file is named using the session ID, for example:
+
+`3fba2d5e-7a2a-4f48-8c29-84692e17f289.json`
+
+### Archive Metadata
+
+GroqSharp maintains a title and a preview for each conversation. Titles can be renamed, and previews help identify the content at a glance. The archive list shows:
+
+- Session ID
+- Title
+- Last Modified timestamp
+- First line preview
+
+### Managing Archives via CLI
+
+Use the `/archive` command followed by one of the subcommands:
+
+| Command                             | Description                         |
+| ----------------------------------- | ----------------------------------- |
+| `/archive list`                     | List all saved conversations        |
+| `/archive load [sessionId]`         | Load a conversation by ID or index  |
+| `/archive delete [sessionId]`       | Delete a saved conversation         |
+| `/archive rename [sessionId] title` | Rename the archive with a new title |
+
+Use the full session ID or the number shown in the list.
+
+Example:
 
 ```text
-write-a-song__a1b2c3d4.json
+/archive list
+1. [3fba2d5e-7a2a-4f48-8c29-84692e17f289] Write a song
+   Last Modified: 2025-06-18
+   Preview: Write a dystopian-themed punk rock chorus...
+
+/archive rename 3fba2d5e-7a2a-4f48-8c29-84692e17f289 "Dystopian Punk Session"
+/archive delete 3fba2d5e-7a2a-4f48-8c29-84692e17f289
 ```
-
-Use the `/archive` command to manage them:
-
-| Command                      | Description                           |
-|------------------------------|---------------------------------------|
-| `/archive list`              | List all saved conversations          |
-| `/archive load 1`            | Load a conversation by index or name  |
-| `/archive delete 2`          | Delete a saved conversation           |
-| `/archive rename 3 new-name` | Rename the archive while keeping ID   |
-
-Each archive is identified by the first few words of the first message, followed by a short unique ID.
 
 ## Starting a New Chat
 
@@ -209,9 +266,9 @@ Successfully exported to C:\Temp\sample.txt
 ## Dependencies
 
 - .NET 6.0 or later
- - Microsoft.Extensions.Configuration
- - Microsoft.Extensions.DependencyInjection
- - Microsoft.Extensions.Http
+- Microsoft.Extensions.Configuration
+- Microsoft.Extensions.DependencyInjection
+- Microsoft.Extensions.Http
 
 ## License
 
