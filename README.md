@@ -1,6 +1,7 @@
 # GroqSharp
 
-GroqSharp is a modern, extensible .NET console and Web API application for interacting with Groq's LLMs. It supports structured prompts, command-based interaction, file-based text extraction, and HTTP-based chat, all wrapped in a pluggable architecture.
+GroqSharp is a modern, modular .NET client library with extensible console and Web API frontends for interacting with Groq's LLMs.
+It supports structured prompts, command-based interaction, file-based text extraction, and HTTP-based chat — all built on a pluggable, provider-agnostic architecture.
 
 ![GroqSharp](https://github.com/user-attachments/assets/9d8caca6-d8ac-423e-aaea-fc942a811fed)
 
@@ -197,7 +198,7 @@ GroqSharp maintains a title and a preview for each conversation. Titles can be r
 
 - Session ID
 - Title
-- Last Modified timestamp
+- Last modified timestamp
 - First line preview
 
 ### Managing Archives via CLI
@@ -265,7 +266,7 @@ Successfully exported to C:\Temp\sample.txt
 
 ## Dependencies
 
-- .NET 6.0 or later
+- .NET 8.0 or later
 - Microsoft.Extensions.Configuration
 - Microsoft.Extensions.DependencyInjection
 - Microsoft.Extensions.Http
