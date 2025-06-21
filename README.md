@@ -160,4 +160,4 @@ MIT License
 
 ## Support
 
-Open an issue on the [GitHub repo](https://github.com/your-org/GroqSharp/issues) for bugs or suggestions.
+Open an issue on the [GitHub repo](https://github.com/jambelnet/GroqSharp/issues) for bugs or suggestions.
