@@ -8,7 +8,7 @@ namespace GroqSharp.Core.Models
         public string Role { get; set; } = "user";
 
         [JsonPropertyName("content")]
-        public string Content { get; set; }
+        public object Content { get; set; }
 
         // Remove the Timestamp property for API requests
         [JsonIgnore]

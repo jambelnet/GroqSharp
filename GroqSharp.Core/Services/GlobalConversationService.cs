@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Models;
+﻿using GroqSharp.Core.Helpers;
+using GroqSharp.Core.Models;
 using GroqSharp.Core.Services.Interfaces;
 using GroqSharp.Core.Services.Models;
 using System.Collections.Concurrent;
@@ -92,7 +93,7 @@ namespace GroqSharp.Core.Services
                         SessionId = sessionId,
                         Title = data.Title,
                         LastModified = data.LastModified,
-                        Preview = data.Messages.LastOrDefault()?.Content?[..Math.Min(50, data.Messages.LastOrDefault()?.Content.Length ?? 0)] ?? "Empty"
+                        Preview = ContentHelpers.GetPreview(data.Messages.LastOrDefault()?.Content)
                     });
                 }
                 catch
@@ -200,8 +201,8 @@ namespace GroqSharp.Core.Services
 
         private string GetTitleFromMessages(List<Message> messages)
         {
-            return messages.FirstOrDefault()?.Content?[..Math.Min(30, messages.FirstOrDefault()?.Content.Length ?? 0)]
-                   ?? "Untitled Conversation";
+            string preview = ContentHelpers.GetPreview(messages.FirstOrDefault()?.Content);
+            return preview ?? "Untitled Conversation";
         }
 
         private string GetSessionFilePath(string sessionId)

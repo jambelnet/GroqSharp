@@ -30,6 +30,21 @@ namespace GroqSharp.Core.Extensions
 
             services.AddTransient<IGroqService, GroqService>();
 
+            services.AddHttpClient<ITextToSpeechService, TextToSpeechService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
+
+            services.AddHttpClient<ISpeechToTextService, SpeechToTextService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
+
+            services.AddHttpClient<IVisionService, VisionService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
+
             return services;
         }
     }

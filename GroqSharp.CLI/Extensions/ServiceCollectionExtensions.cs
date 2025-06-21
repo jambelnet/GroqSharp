@@ -22,6 +22,9 @@ namespace GroqSharp.CLI.Extensions
             services.AddTransient<ICommandProcessor, ProcessCommandHandler>();
             services.AddTransient<ICommandProcessor, SetModelCommandHandler>();
             services.AddTransient<ICommandProcessor, StreamCommandHandler>();
+            services.AddTransient<ICommandProcessor, TranscribeCommandHandler>();
+            services.AddTransient<ICommandProcessor, SpeakCommandHandler>();
+            services.AddTransient<ICommandProcessor, VisionCommandHandler>();
 
             services.AddSingleton<CommandDispatcher>();
 
