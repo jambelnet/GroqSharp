@@ -45,6 +45,11 @@ namespace GroqSharp.Core.Extensions
                 client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
             });
 
+            services.AddHttpClient<ITranslationService, TranslationService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
+
             return services;
         }
     }
