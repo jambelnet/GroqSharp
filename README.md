@@ -3,7 +3,7 @@
 GroqSharp is a modern, modular .NET client library with extensible console and Web API frontends for interacting with Groq's LLMs.  
 It supports structured prompts, command-based interaction, multimodal capabilities (vision, speech-to-text, text-to-speech), file-based extraction, and HTTP-based chat.
 
-![GroqSharp](https://github.com/user-attachments/assets/9d8caca6-d8ac-423e-aaea-fc942a811fed)
+![GroqSharp Vision](https://github.com/user-attachments/assets/1c21a120-b863-45fd-b65a-ed51a962b425)
 
 ## Features
 
