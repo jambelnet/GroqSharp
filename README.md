@@ -139,11 +139,15 @@ AI will analyze the content, and you can export output after.
 
 ## Exporting Output
 
+You can export AI responses or the results of other CLI commands.
+
 ```text
-/export This is a sample summary
-Enter path: summary.txt
-=> Successfully exported
+/export "This is a sample summary" C:\output\summary.txt
+/export /vision https://example.com/image.jpg "What do you see?" C:\output\vision.txt
+/export /speak "Hello world!" C:\output\speech.wav
 ```
+
+If no output file path is provided, the CLI will prompt for one.
 
 ## Programmatic Usage
 

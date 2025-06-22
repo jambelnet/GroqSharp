@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Handlers;
 using GroqSharp.CLI.Commands.Interfaces;
+using GroqSharp.CLI.Commands.Routing;
 using GroqSharp.CLI.Services;
 using GroqSharp.Core.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,7 @@ namespace GroqSharp.CLI.Extensions
             services.AddTransient<ICommandProcessor, TranscribeCommandHandler>();
             services.AddTransient<ICommandProcessor, SpeakCommandHandler>();
             services.AddTransient<ICommandProcessor, VisionCommandHandler>();
+            services.AddSingleton<ICommandRouter, CommandRouter>();
 
             services.AddSingleton<CommandDispatcher>();
 

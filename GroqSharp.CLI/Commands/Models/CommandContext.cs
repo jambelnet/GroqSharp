@@ -8,6 +8,7 @@ namespace GroqSharp.CLI.Commands.Models
     {
         private readonly IGlobalConversationService _conversationService;
         public IGroqService GroqService { get; set; }
+        public IServiceProvider ServiceProvider { get; }
         public ConversationService Conversation { get; private set; }
         public string CurrentModel { get; set; }
         public string CurrentTitle { get; private set; }
@@ -15,13 +16,12 @@ namespace GroqSharp.CLI.Commands.Models
         public string SessionId { get; private set; }
         public bool ShouldExit { get; set; }
 
-        public CommandContext(IGlobalConversationService conversationService, ConversationService conversation)
+        public CommandContext(IServiceProvider serviceProvider, IGlobalConversationService conversationService, ConversationService conversation)
         {
+            ServiceProvider = serviceProvider;
             _conversationService = conversationService;
             Conversation = conversation;
-            //SessionId = Guid.NewGuid().ToString();
         }
-
 
         public async Task InitializeSession(string sessionId, string title = null)
         {

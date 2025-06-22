@@ -2,6 +2,7 @@
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Interfaces;
+using System.Text.Json;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -25,9 +26,20 @@ namespace GroqSharp.CLI.Commands.Handlers
             try
             {
                 var result = await _visionService.AnalyzeImageAsync(imagePath, prompt);
+
+                // Parse the response to extract just the model's message content
+                using var doc = JsonDocument.Parse(result);
+                var content = doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nVision Response:\n" + result);
+                Console.WriteLine("\nVision Response:\n" + content);
                 Console.ResetColor();
+
+                context.PreviousCommandResult = content ?? "(no content)";
             }
             catch (Exception ex)
             {
