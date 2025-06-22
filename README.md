@@ -87,15 +87,16 @@ Sample `appsettings.json`:
 - `/models` – List all available models
 - `/setmodel` – Change the active model
 - `/stream` – Stream chat response
+- `/new` – Start a new chat session
 - `/history` – View conversation history
 - `/clear` – Clear current session memory
 - `/archive` – Manage saved conversations
-- `/new` – Start a new chat session
 - `/process` – Import and analyze a file
 - `/export` – Save AI output to file
-- `/vision` – Analyze an image (URL or file)
 - `/speak` – Convert text to speech (WAV)
 - `/transcribe` – Transcribe audio file to text
+- `/translate` – Translate non-English audio to English
+- `/vision` – Analyze an image (URL or file)
 - `/exit` – Exit the CLI
 - `/help` – Display available commands
 
@@ -108,6 +109,37 @@ GroqSharp supports multimodal AI use cases:
 | **Vision**         | Analyze images using `meta-llama/llama-4-scout-17b-16e-instruct` via file or URL |
 | **Text-to-Speech** | Uses `playai-tts` for converting text to WAV audio with configurable voices      |
 | **Speech-to-Text** | Uses `whisper-large-v3-turbo` for accurate, multilingual transcriptions          |
+| **Translation**    | Uses `whisper-large-v3` to translate non-English audio to English                |
+
+### Multimodal Usage Examples
+
+#### Vision
+
+```text
+/vision https://example.com/image.jpg "Describe this scene"
+/export /vision image.jpg "What do you see?" C:\output\vision.txt
+```
+
+#### Text-to-Speech
+
+```text
+/speak "Welcome to GroqSharp!"
+/export /speak "Hello world!" C:\output\speech.wav
+```
+
+#### Speech-to-Text
+
+```text
+/transcribe C:\path\to\audio.mp3
+```
+
+#### Translation
+
+```text
+/translate
+Enter audio file path to translate: C:\path\foreign_audio.mp3
+Translation result: "Welcome to our program. Today we’ll discuss..."
+```
 
 ## Streaming Chat
 
