@@ -89,8 +89,11 @@ namespace GroqSharp.Core.Helpers
                     ApiKey = tempSettings.ApiKey,
                     BaseUrl = tempSettings.BaseUrl,
                     DefaultModel = selectedModel,
+                    DefaultVisionModel = "meta-llama/llama-4-scout-17b-16e-instruct",
+                    DefaultTTSModel = "playai-tts",
+                    DefaultWhisperModel = "whisper-large-v3-turbo",
                     DefaultTemperature = temperature,
-                    DefaultMaxTokens = maxTokens
+                    DefaultMaxTokens = maxTokens,
                 }
             };
 
