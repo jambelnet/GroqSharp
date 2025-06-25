@@ -1,6 +1,6 @@
-﻿using GroqSharp.Core.Services.Models;
+﻿using GroqSharp.Core.Models;
 
-namespace GroqSharp.Core.Services.Interfaces
+namespace GroqSharp.Core.Interfaces
 {
     public interface IGlobalConversationService
     {

@@ -57,5 +57,17 @@ namespace GroqSharp.Core.Models
         /// </summary>
         [JsonPropertyName("presence_penalty")]
         public double PresencePenalty { get; set; } = 0.0;
+
+        /// <summary>
+        /// Controls how model reasoning is presented ("raw", "parsed", or "hidden").
+        /// </summary>
+        [JsonPropertyName("reasoning_format")]
+        public string? ReasoningFormat { get; set; }
+
+        /// <summary>
+        /// Controls how much effort the model spends on reasoning ("default" or "none", only for Qwen models).
+        /// </summary>
+        [JsonPropertyName("reasoning_effort")]
+        public string? ReasoningEffort { get; set; }
     }
 }

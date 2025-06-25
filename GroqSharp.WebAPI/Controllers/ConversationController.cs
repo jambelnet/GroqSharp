@@ -1,4 +1,4 @@
-﻿using GroqSharp.Core.Services.Interfaces;
+﻿using GroqSharp.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroqSharp.WebAPI.Controllers

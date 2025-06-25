@@ -3,39 +3,38 @@
 namespace GroqSharp.Core.Interfaces
 {
     /// <summary>
-    /// Defines methods for interacting with the Groq chat API.
+    /// Defines methods for interacting with the Groq chat API via HTTP.
     /// </summary>
     public interface IGroqClient
     {
         /// <summary>
-        /// Sends a structured chat request to the model and returns the raw response.
+        /// Sends a user prompt and returns the model's raw response.
         /// </summary>
-        /// <param name="request">The full chat request including model, messages, and settings.</param>
-        /// <returns>The model's response as a string.</returns>
-        Task<string> CompleteChatAsync(ChatRequest request);
-
-        /// <summary>
-        /// Sends a basic user message to the model and returns the raw response.
-        /// </summary>
-        /// <param name="userMessage">The user's message string.</param>
-        /// <returns>The model's response as a string.</returns>
         Task<string> CompleteChatAsync(string userMessage);
 
         /// <summary>
-        /// Retrieves the list of available language models.
+        /// Sends a structured chat request to the model and returns the raw response.
         /// </summary>
-        /// <returns>A list of available model identifiers.</returns>
+        Task<string> CompleteChatAsync(ChatRequest request);
+
+        /// <summary>
+        /// Sends a structured request and returns a parsed chat response (for reasoning, tools, etc.).
+        /// </summary>
+        Task<ChatCompletionResponse> CompleteStructuredChatAsync(ChatRequest request);
+
+        /// <summary>
+        /// Streams chat completion tokens as they arrive.
+        /// </summary>
+        IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request);
+
+        /// <summary>
+        /// Returns a list of available models.
+        /// </summary>
         Task<List<string>> GetAvailableModelsAsync();
 
         /// <summary>
-        /// Retrieves the default language model.
+        /// Gets the default model configured.
         /// </summary>
-        /// <returns>The default model identifier.</returns>
         Task<string> GetDefaultModelAsync();
-
-        /// <summary>
-        /// Streams chat completions from the model in real-time
-        /// </summary>
-        IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request);
     }
 }

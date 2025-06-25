@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using GroqSharp.Core.Services;
 
-namespace GroqSharp.Core.Services.Models
+namespace GroqSharp.Core.Models
 {
     public class ConversationSession
     {

@@ -1,6 +1,5 @@
 ﻿using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Services;
-using GroqSharp.Core.Services.Interfaces;
 
 namespace GroqSharp.CLI.Commands.Models
 {

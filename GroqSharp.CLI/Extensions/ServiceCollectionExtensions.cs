@@ -14,6 +14,8 @@ namespace GroqSharp.CLI.Extensions
     {
         public static IServiceCollection AddGroqSharpCommands(this IServiceCollection services)
         {
+            services.AddSingleton<ICommandProcessor, TranslateCommandHandler>();
+            services.AddSingleton<ICommandRouter, CommandRouter>();
             services.AddTransient<ICommandProcessor, ArchiveCommandHandler>();
             services.AddTransient<ICommandProcessor, ClearCommandHandler>();
             services.AddTransient<ICommandProcessor, ExitCommandHandler>();
@@ -23,13 +25,12 @@ namespace GroqSharp.CLI.Extensions
             services.AddTransient<ICommandProcessor, ModelsCommandHandler>();
             services.AddTransient<ICommandProcessor, NewCommandHandler>();
             services.AddTransient<ICommandProcessor, ProcessCommandHandler>();
+            services.AddTransient<ICommandProcessor, ReasonCommandHandler>();
             services.AddTransient<ICommandProcessor, SetModelCommandHandler>();
+            services.AddTransient<ICommandProcessor, SpeakCommandHandler>();
             services.AddTransient<ICommandProcessor, StreamCommandHandler>();
             services.AddTransient<ICommandProcessor, TranscribeCommandHandler>();
-            services.AddTransient<ICommandProcessor, SpeakCommandHandler>();
             services.AddTransient<ICommandProcessor, VisionCommandHandler>();
-            services.AddSingleton<ICommandRouter, CommandRouter>();
-            services.AddSingleton<ICommandProcessor, TranslateCommandHandler>();
 
             services.AddSingleton<CommandDispatcher>();
 

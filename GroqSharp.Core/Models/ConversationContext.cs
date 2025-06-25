@@ -1,6 +1,4 @@
-﻿using GroqSharp.Core.Models;
-
-namespace GroqSharp.Core.Services.Models
+﻿namespace GroqSharp.Core.Models
 {
     public class ConversationContext
     {

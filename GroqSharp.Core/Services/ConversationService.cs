@@ -1,11 +1,11 @@
-﻿using GroqSharp.Core.Models;
-using GroqSharp.Core.Services.Interfaces;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
 
 namespace GroqSharp.Core.Services
 {
     public class ConversationService : IAutoSaveConversation
     {
-        private readonly object _lock = new(); 
+        private readonly object _lock = new();
         private readonly int _maxHistoryLength;
         private string _sessionId;
         private readonly IGlobalConversationService _globalConversationService;
@@ -40,6 +40,15 @@ namespace GroqSharp.Core.Services
 
             // Fire-and-forget auto-save
             _ = TryAutoSave();
+        }
+
+        public void AddMessage(Message message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            string content = message.Content?.ToString() ?? string.Empty;
+            AddMessage(message.Role, content);
         }
 
         private async Task TryAutoSave()

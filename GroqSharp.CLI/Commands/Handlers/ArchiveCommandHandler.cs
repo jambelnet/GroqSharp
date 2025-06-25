@@ -1,7 +1,7 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
-using GroqSharp.Core.Services.Interfaces;
-using GroqSharp.Core.Services.Models;
+using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {

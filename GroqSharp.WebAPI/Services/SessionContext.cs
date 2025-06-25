@@ -1,6 +1,6 @@
-﻿using GroqSharp.Core.Services;
-using GroqSharp.Core.Services.Interfaces;
-using GroqSharp.Core.Services.Models;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
+using GroqSharp.Core.Services;
 
 namespace GroqSharp.WebAPI.Services
 {

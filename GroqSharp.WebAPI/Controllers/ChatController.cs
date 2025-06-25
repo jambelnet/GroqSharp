@@ -1,6 +1,5 @@
 ﻿using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
-using GroqSharp.Core.Services.Interfaces;
 using GroqSharp.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 

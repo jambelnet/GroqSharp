@@ -1,4 +1,4 @@
-﻿namespace GroqSharp.Core.Services.Interfaces
+﻿namespace GroqSharp.Core.Interfaces
 {
     public interface IAutoSaveConversation
     {

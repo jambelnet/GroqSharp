@@ -3,7 +3,6 @@ using GroqSharp.Core.Configuration.Models;
 using GroqSharp.Core.Configuration.Services;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Services;
-using GroqSharp.Core.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -46,6 +45,11 @@ namespace GroqSharp.Core.Extensions
             });
 
             services.AddHttpClient<ITranslationService, TranslationService>(client =>
+            {
+                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
+            });
+
+            services.AddHttpClient<IReasoningService, ReasoningService>(client =>
             {
                 client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
             });

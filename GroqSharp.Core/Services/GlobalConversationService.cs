@@ -1,7 +1,6 @@
 ﻿using GroqSharp.Core.Helpers;
+using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
-using GroqSharp.Core.Services.Interfaces;
-using GroqSharp.Core.Services.Models;
 using System.Collections.Concurrent;
 using System.Text.Json;
 

@@ -2,37 +2,39 @@
 
 namespace GroqSharp.Core.Interfaces
 {
+    /// <summary>
+    /// High-level service abstraction for chat interactions and model operations.
+    /// </summary>
     public interface IGroqService
     {
         /// <summary>
-        /// Gets a chat completion response for a simple prompt string.
+        /// Sends a simple user prompt and returns the model's response.
         /// </summary>
-        /// <param name="prompt">The prompt text to send to the model.</param>
-        /// <returns>The model's response as a string.</returns>
         Task<string> GetChatCompletionAsync(string prompt);
 
         /// <summary>
-        /// Gets a chat completion response using a detailed chat request.
+        /// Sends a full structured request and returns the model's raw response.
         /// </summary>
-        /// <param name="request">The ChatRequest containing model parameters and messages.</param>
-        /// <returns>The model's response as a string.</returns>
         Task<string> GetChatCompletionAsync(ChatRequest request);
 
         /// <summary>
-        /// Retrieves a list of available models from the backend.
+        /// Sends a full structured request and returns the parsed model response.
         /// </summary>
-        /// <returns>A list of model names.</returns>
+        Task<ChatCompletionResponse> GetStructuredResponseAsync(ChatRequest request);
+
+        /// <summary>
+        /// Streams chat completions for real-time updates.
+        /// </summary>
+        IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request);
+
+        /// <summary>
+        /// Gets the list of available models.
+        /// </summary>
         Task<List<string>> GetAvailableModelsAsync();
 
         /// <summary>
-        /// Retrieves the default language model.
+        /// Gets the default model name.
         /// </summary>
-        /// <returns>The default model identifier.</returns>
         Task<string> GetDefaultModelAsync();
-
-        /// <summary>
-        /// Streams chat completions from the model in real-time
-        /// </summary>
-        IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request);
     }
 }

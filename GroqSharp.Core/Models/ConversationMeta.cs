@@ -1,4 +1,4 @@
-﻿namespace GroqSharp.Core.Services.Models
+﻿namespace GroqSharp.Core.Models
 {
     public class ConversationMeta
     {

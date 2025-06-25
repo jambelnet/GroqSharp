@@ -44,6 +44,13 @@ namespace GroqSharp.Core.Services
             return await ProcessChatRequestAsync(request);
         }
 
+        public async Task<ChatCompletionResponse> CompleteStructuredChatAsync(ChatRequest request)
+        {
+            using var response = await SendChatRequestAsync(request, "application/json");
+            var result = await response.Content.ReadFromJsonAsync<ChatCompletionResponse>();
+            return result ?? new ChatCompletionResponse();
+        }
+
         public async IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request)
         {
             request = request with { Stream = true }; // Ensure streaming

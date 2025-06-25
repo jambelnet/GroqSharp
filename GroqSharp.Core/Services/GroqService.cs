@@ -3,6 +3,9 @@ using GroqSharp.Core.Models;
 
 namespace GroqSharp.Core.Services
 {
+    /// <summary>
+    /// Provides higher-level orchestration for Groq chat and model operations.
+    /// </summary>
     public class GroqService : IGroqService
     {
         private readonly IGroqClient _groqClient;
@@ -22,28 +25,27 @@ namespace GroqSharp.Core.Services
 
         public async Task<string> GetChatCompletionAsync(ChatRequest request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
             return await _groqClient.CompleteChatAsync(request);
+        }
+
+        public async Task<ChatCompletionResponse> GetStructuredResponseAsync(ChatRequest request)
+        {
+            return await _groqClient.CompleteStructuredChatAsync(request);
         }
 
         public IAsyncEnumerable<string> StreamChatCompletionAsync(ChatRequest request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
             return _groqClient.StreamChatCompletionAsync(request);
         }
 
-        public async Task<List<string>> GetAvailableModelsAsync()
+        public Task<List<string>> GetAvailableModelsAsync()
         {
-            return await _groqClient.GetAvailableModelsAsync();
+            return _groqClient.GetAvailableModelsAsync();
         }
 
-        public async Task<string> GetDefaultModelAsync()
+        public Task<string> GetDefaultModelAsync()
         {
-            return await _groqClient.GetDefaultModelAsync();
+            return _groqClient.GetDefaultModelAsync();
         }
     }
 }
