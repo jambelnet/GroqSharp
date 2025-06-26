@@ -97,6 +97,7 @@ Sample `appsettings.json`:
 - `/transcribe` – Transcribe audio file to text
 - `/translate` – Translate non-English audio to English
 - `/vision` – Analyze an image (URL or file)
+- `/reason` - Solve problems step-by-step using structured reasoning with memory
 - `/exit` – Exit the CLI
 - `/help` – Display available commands
 
@@ -110,6 +111,7 @@ GroqSharp supports multimodal AI use cases:
 | **Text-to-Speech** | Uses `playai-tts` for converting text to WAV audio with configurable voices      |
 | **Speech-to-Text** | Uses `whisper-large-v3-turbo` for accurate, multilingual transcriptions          |
 | **Translation**    | Uses `whisper-large-v3` to translate non-English audio to English                |
+| **Reasoning**      | Uses `deepseek-r1-distill-llama-70b` or `qwen3-32b` for structured thinking      |
 
 ### Multimodal Usage Examples
 
@@ -148,6 +150,38 @@ Use `/stream` to start streaming output. End with `/end`.
 ```text
 You: What is quantum computing?
 AI: Quantum computing is a technology that...
+```
+
+## Reasoning
+
+Use `/reason` to invoke a structured reasoning task with memory persistence:
+
+```text
+/reason What's the capital of Luxembourg?
+```
+
+Or specify new problems mid-session:
+
+```text
+/reason Write a Java Hello World program
+/reason Convert it to C#
+/reason Now generate a Python version
+```
+
+The reasoning output will include internal <think>...</think> steps when supported by the model.
+
+**Example Output**
+
+```text
+You: /reason Write a Hello World in Python
+
+Reasoning Output:
+<think>
+Okay, I need to write a simple Python program that prints 'Hello, World!'.
+I'll use the print function...
+</think>
+
+print("Hello, World!")
 ```
 
 ## Archive Management

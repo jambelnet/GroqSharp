@@ -24,6 +24,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             Console.WriteLine("  /models     - Show available models");
             Console.WriteLine("  /setmodel   - Change current model");
             Console.WriteLine("  /stream     - Start a streaming chat session");
+            Console.WriteLine("  /reason     - Solve problems step-by-step using structured reasoning with memory");
             Console.WriteLine();
 
             Console.WriteLine("Media & File Tools:");
