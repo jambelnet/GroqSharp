@@ -38,6 +38,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthorization();
 app.UseSession(); // Use after UseRouting but before UseEndpoints if you use them
 app.MapControllers();

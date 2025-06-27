@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GroqSharp Chat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Conversations</h2>
+        <button id="newSessionBtn">+ New</button>
+      </div>
+      <ul id="conversationList"></ul>
+    </aside>
+
+    <div class="chat-container">
+      <header>
+        <h1>GroqSharp Chat</h1>
+        <select id="modelSelect"></select>
+      </header>
+      <main>
+        <div id="chatWindow"></div>
+      </main>
+      <footer>
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button id="sendButton">Send</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

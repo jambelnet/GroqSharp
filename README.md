@@ -224,6 +224,10 @@ var service = provider.GetRequiredService<IGroqService>();
 var result = await service.GetChatCompletionAsync("Tell me a joke");
 ```
 
+## Chat UI (Frontend)
+
+The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacting with the GroqSharp WebAPI.
+
 ## License
 
 MIT License
