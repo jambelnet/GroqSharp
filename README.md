@@ -5,6 +5,18 @@ It supports structured prompts, command-based interaction, multimodal capabiliti
 
 ![GroqSharp Vision](https://github.com/user-attachments/assets/1c21a120-b863-45fd-b65a-ed51a962b425)
 
+## Chat UI (Frontend)
+
+The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacting with the GroqSharp WebAPI.
+
+Dark Mode
+
+![GroqSharp Dark](https://github.com/user-attachments/assets/5717d347-b515-4f82-97a1-0bcc2a28cfa5)
+
+Light Mode
+
+![GroqSharp Light](https://github.com/user-attachments/assets/3b1b3bec-b74a-42e9-8f08-f66f89f43d9a)
+
 ## Features
 
 - Interactive console with natural and command-based input (CLI)
@@ -223,10 +235,6 @@ var service = provider.GetRequiredService<IGroqService>();
 
 var result = await service.GetChatCompletionAsync("Tell me a joke");
 ```
-
-## Chat UI (Frontend)
-
-The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacting with the GroqSharp WebAPI.
 
 ## License
 
