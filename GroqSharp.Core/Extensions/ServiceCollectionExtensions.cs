@@ -10,49 +10,28 @@ namespace GroqSharp.Core.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddGroqSharpCore(
-            this IServiceCollection services,
-            IConfiguration config)
+        public static IServiceCollection AddGroqSharpCore(this IServiceCollection services, IConfiguration config)
         {
+            // Configuration
             services.AddSingleton(config);
-
-            services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
             services.Configure<GroqConfiguration>(config.GetSection("Groq"));
+            services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
+            services.AddSingleton<ModelConfigurationService>();
 
+            // Core Services
             services.AddSingleton<IGlobalConversationService, GlobalConversationService>();
             services.AddScoped<ConversationService>();
-
-            services.AddHttpClient<IGroqClient, GroqClient>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
-
             services.AddTransient<IGroqService, GroqService>();
 
-            services.AddHttpClient<ITextToSpeechService, TextToSpeechService>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
+            // HTTP Clients (all using same base URL)
+            var baseUri = new Uri(config["Groq:BaseUrl"]);
 
-            services.AddHttpClient<ISpeechToTextService, SpeechToTextService>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
-
-            services.AddHttpClient<IVisionService, VisionService>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
-
-            services.AddHttpClient<ITranslationService, TranslationService>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
-
-            services.AddHttpClient<IReasoningService, ReasoningService>(client =>
-            {
-                client.BaseAddress = new Uri(config["Groq:BaseUrl"]);
-            });
+            services.AddHttpClient<IGroqClient, GroqClient>(client => client.BaseAddress = baseUri);
+            services.AddHttpClient<ITextToSpeechService, TextToSpeechService>(client => client.BaseAddress = baseUri);
+            services.AddHttpClient<ISpeechToTextService, SpeechToTextService>(client => client.BaseAddress = baseUri);
+            services.AddHttpClient<IVisionService, VisionService>(client => client.BaseAddress = baseUri);
+            services.AddHttpClient<ITranslationService, TranslationService>(client => client.BaseAddress = baseUri);
+            services.AddHttpClient<IReasoningService, ReasoningService>(client => client.BaseAddress = baseUri);
 
             return services;
         }

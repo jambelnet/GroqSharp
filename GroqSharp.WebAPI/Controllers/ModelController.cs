@@ -10,12 +10,12 @@ namespace GroqSharp.WebAPI.Controllers
     public class ModelController : ControllerBase
     {
         private readonly IGroqService _groqService;
-        private readonly ConversationService _conversation;
+        private readonly ModelConfigurationService _modelConfig;
 
-        public ModelController(IGroqService groqService, ConversationService conversation)
+        public ModelController(IGroqService groqService, ModelConfigurationService modelConfig)
         {
             _groqService = groqService;
-            _conversation = conversation;
+            _modelConfig = modelConfig;
         }
 
         [HttpGet("list")]
@@ -35,8 +35,15 @@ namespace GroqSharp.WebAPI.Controllers
             if (!availableModels.Contains(request.Model))
                 return NotFound($"Model '{request.Model}' is not available.");
 
-            _conversation.CurrentModel = request.Model;
+            _modelConfig.SetModel(request.Model);
             return Ok($"Model set to {request.Model}");
+        }
+
+        [HttpGet("current")]
+        public IActionResult GetCurrentModel()
+        {
+            var current = _modelConfig.GetModel();
+            return Ok(current);
         }
     }
 }

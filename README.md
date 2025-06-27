@@ -168,7 +168,7 @@ Or specify new problems mid-session:
 /reason Now generate a Python version
 ```
 
-The reasoning output will include internal <think>...</think> steps when supported by the model.
+The reasoning output will include internal `<think>...</think>` steps when supported by the model.
 
 **Example Output**
 
@@ -218,10 +218,10 @@ If no output file path is provided, the CLI will prompt for one.
 ## Programmatic Usage
 
 ```csharp
-services.AddGroqSharp(configuration);
+services.AddGroqSharpCore(configuration);
 var service = provider.GetRequiredService<IGroqService>();
 
-var result = await service.CompleteChatAsync("Tell me a joke");
+var result = await service.GetChatCompletionAsync("Tell me a joke");
 ```
 
 ## License

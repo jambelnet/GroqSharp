@@ -15,18 +15,18 @@ namespace GroqSharp.Core.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
-        private readonly string _defaultModel;
         private readonly GroqConfiguration _settings;
+        private readonly ModelConfigurationService _modelConfig;
 
         private const string ChatCompletionsEndpoint = "chat/completions";
         private const string ModelsEndpoint = "models";
 
-        public GroqClient(HttpClient httpClient, IGroqConfigurationService configService)
+        public GroqClient(HttpClient httpClient, IGroqConfigurationService configService, ModelConfigurationService modelConfig)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _modelConfig = modelConfig ?? throw new ArgumentNullException(nameof(modelConfig));
             _settings = configService.GetConfiguration();
             _apiKey = _settings.ApiKey ?? throw new ArgumentException("API Key is required");
-            _defaultModel = _settings.DefaultModel;
         }
 
         #region Chat Completion Methods
@@ -78,7 +78,7 @@ namespace GroqSharp.Core.Services
         {
             var fallbackModels = new List<string>
             {
-                _settings.DefaultModel,
+                _modelConfig.GetModel(),
                 "llama3-70b-8192",
                 "llama3-8b-8192"
             };
@@ -104,14 +104,9 @@ namespace GroqSharp.Core.Services
             }
         }
 
-        public async Task<string> GetDefaultModelAsync()
+        public Task<string> GetDefaultModelAsync()
         {
-            var availableModels = await GetAvailableModelsAsync();
-            if (!availableModels.Contains(_defaultModel))
-            {
-                Console.WriteLine($"Warning: Default model '{_defaultModel}' not found in available models");
-            }
-            return _defaultModel;
+            return Task.FromResult(_modelConfig.GetModel());
         }
 
         #endregion
@@ -120,9 +115,11 @@ namespace GroqSharp.Core.Services
 
         private ChatRequest CreateBaseChatRequest(string userMessage)
         {
+            var model = _modelConfig.GetModel();
+
             return new ChatRequest
             {
-                Model = _defaultModel,
+                Model = model,
                 Messages = new[] { new Message { Role = "user", Content = userMessage } },
                 Temperature = _settings.DefaultTemperature,
                 MaxTokens = _settings.DefaultMaxTokens

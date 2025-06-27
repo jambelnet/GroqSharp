@@ -26,12 +26,12 @@ namespace GroqSharp.WebAPI.Controllers
         [HttpPost("messages")]
         public async Task<IActionResult> SendMessage(string sessionId, [FromBody] Message userMessage)
         {
-            if (string.IsNullOrWhiteSpace(userMessage?.Content))
+            if (string.IsNullOrWhiteSpace(userMessage?.Content.ToString()))
                 return BadRequest("Message content cannot be empty.");
 
             var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
 
-            sessionContext.Conversation.AddMessage("user", userMessage.Content);
+            sessionContext.Conversation.AddMessage("user", userMessage.Content.ToString());
 
             var response = await _groqService.GetChatCompletionAsync(new ChatRequest
             {

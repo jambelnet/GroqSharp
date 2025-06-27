@@ -3,7 +3,6 @@ using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Routing;
 using GroqSharp.CLI.Services;
 using GroqSharp.Core.Extensions;
-using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +13,10 @@ namespace GroqSharp.CLI.Extensions
     {
         public static IServiceCollection AddGroqSharpCommands(this IServiceCollection services)
         {
-            services.AddSingleton<ICommandProcessor, TranslateCommandHandler>();
-            services.AddSingleton<ICommandRouter, CommandRouter>();
+            // Core/shared services
+            services.AddSingleton<ModelConfigurationService>();
+
+            // Command handlers (alphabetical order for easy maintenance)
             services.AddTransient<ICommandProcessor, ArchiveCommandHandler>();
             services.AddTransient<ICommandProcessor, ClearCommandHandler>();
             services.AddTransient<ICommandProcessor, ExitCommandHandler>();
@@ -29,9 +30,12 @@ namespace GroqSharp.CLI.Extensions
             services.AddTransient<ICommandProcessor, SetModelCommandHandler>();
             services.AddTransient<ICommandProcessor, SpeakCommandHandler>();
             services.AddTransient<ICommandProcessor, StreamCommandHandler>();
+            services.AddSingleton<ICommandProcessor, TranslateCommandHandler>();
             services.AddTransient<ICommandProcessor, TranscribeCommandHandler>();
             services.AddTransient<ICommandProcessor, VisionCommandHandler>();
 
+            // Routing/dispatch
+            services.AddSingleton<ICommandRouter, CommandRouter>();
             services.AddSingleton<CommandDispatcher>();
 
             return services;

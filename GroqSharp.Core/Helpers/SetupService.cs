@@ -42,7 +42,8 @@ namespace GroqSharp.Core.Helpers
 
             var configService = new GroqConfigurationService(tempConfig);
             var httpClient = new HttpClient { BaseAddress = new Uri(tempSettings.BaseUrl) };
-            var tempClient = new GroqClient(httpClient, configService);
+            var modelConfigService = new ModelConfigurationService(tempConfig);
+            var tempClient = new GroqClient(httpClient, configService, modelConfigService);
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("\nFetching available models...");
