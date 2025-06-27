@@ -7,27 +7,124 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="layout">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>Conversations</h2>
-        <button id="newSessionBtn">+ New</button>
-      </div>
-      <ul id="conversationList"></ul>
-    </aside>
+  <div id="app">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button id="hamburgerBtn" class="hamburger-btn" aria-label="Toggle sidebar">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <h1>GroqSharp Chat</h1>
+      <button id="settingsBtn" class="settings-btn" aria-label="Open settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+        </svg>
+      </button>
+    </header>
 
-    <div class="chat-container">
-      <header>
-        <h1>GroqSharp Chat</h1>
-        <select id="modelSelect"></select>
-      </header>
-      <main>
-        <div id="chatWindow"></div>
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Main Layout -->
+    <div id="layout" class="layout">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h2>Conversations</h2>
+          <button id="newSessionBtn" class="new-session-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New
+          </button>
+        </div>
+        <ul id="conversationList" class="conversation-list"></ul>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main class="chat-container">
+        <!-- Desktop Header -->
+        <header class="desktop-header">
+          <div class="header-left">
+            <h1>GroqSharp Chat</h1>
+            <div class="model-selector">
+              <label for="modelSelect">Model:</label>
+              <select id="modelSelect"></select>
+            </div>
+          </div>
+          <div class="header-right">
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+            <button id="desktopSettingsBtn" class="settings-btn" aria-label="Open settings">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Chat Window -->
+        <div id="chatWindow" class="chat-window"></div>
+
+        <!-- Input Area -->
+        <footer class="input-area">
+          <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message..." />
+            <button id="sendButton" class="send-btn" aria-label="Send message">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </footer>
       </main>
-      <footer>
-        <input type="text" id="userInput" placeholder="Type your message..." />
-        <button id="sendButton">Send</button>
-      </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="closeSettings" class="close-btn" aria-label="Close settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label for="themeSelect">Theme</label>
+            <select id="themeSelect">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="modelSelectSettings">Default Model</label>
+            <select id="modelSelectSettings"></select>
+          </div>
+          <div class="setting-group">
+            <label for="autoSave">Auto-save conversations</label>
+            <input type="checkbox" id="autoSave" checked />
+          </div>
+          <div class="setting-group">
+            <label for="messageLimit">Message history limit</label>
+            <input type="number" id="messageLimit" value="100" min="10" max="1000" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="resetSettings" class="btn-secondary">Reset to Default</button>
+          <button id="saveSettings" class="btn-primary">Save Settings</button>
+        </div>
+      </div>
     </div>
   </div>
 
