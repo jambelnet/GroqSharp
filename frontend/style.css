@@ -152,25 +152,53 @@ body {
   z-index: 1000;
 }
 
-.sidebar-header {
+/* .sidebar-header {
   padding: 1.5rem 1rem 1rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
+} */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.sidebar-header h2 {
+/* .sidebar-header h2 {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--primary-text);
+} */
+.sidebar-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--primary-text);
 }
 
+/* .new-session-btn {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition);
+} */
 .new-session-btn {
   background-color: var(--accent-color);
   color: white;
   border: none;
   padding: 0.5rem 0.75rem;
+  height: 36px; /* aligns well with text */
   border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.875rem;
@@ -185,6 +213,11 @@ body {
   background-color: var(--accent-hover);
   transform: translateY(-1px);
 }
+
+/* .new-session-btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+} */
 
 /* Conversation List */
 .conversation-list {
@@ -339,13 +372,26 @@ body {
 }
 
 /* Desktop Header */
-.desktop-header {
+/* .desktop-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
   background-color: var(--accent-bg);
   border-bottom: 1px solid var(--border-color);
+} */
+.desktop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.desktop-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .header-left {
@@ -835,4 +881,26 @@ select:focus-visible {
   [data-theme="light"] {
     --border-color: #999;
   }
+}
+
+.theme-icon svg {
+  width: 20px;
+  height: 20px;
+  display: none;
+  stroke: currentColor;
+}
+
+[data-theme="dark"] .theme-icon .icon-moon {
+  display: block;
+}
+
+[data-theme="light"] .theme-icon .icon-sun {
+  display: block;
+}
+
+.icon-gear {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  display: block;
 }

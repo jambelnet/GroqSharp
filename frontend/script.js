@@ -1,7 +1,7 @@
 class ChatApp {
   constructor() {
     this.baseUri = "https://localhost:7141";
-    this.currentSessionId = this.generateSessionId();
+    //this.currentSessionId = this.generateSessionId();
     this.currentModel = "";
     this.settings = this.loadSettings();
     this.isTyping = false;
@@ -33,7 +33,7 @@ class ChatApp {
       closeSettings: document.getElementById("closeSettings"),
       themeSelect: document.getElementById("themeSelect"),
       modelSelectSettings: document.getElementById("modelSelectSettings"),
-      autoSave: document.getElementById("autoSave"),
+      //autoSave: document.getElementById("autoSave"),
       messageLimit: document.getElementById("messageLimit"),
       resetSettings: document.getElementById("resetSettings"),
       saveSettings: document.getElementById("saveSettings")
@@ -47,7 +47,7 @@ class ChatApp {
     this.applyTheme();
     await this.loadModels();
     await this.fetchConversations();
-    await this.createNewSession(this.currentSessionId);
+    //await this.createNewSession(this.currentSessionId);
     this.setupKeyboardShortcuts();
   }
   
@@ -162,10 +162,10 @@ class ChatApp {
     }
     
     // Update theme toggle icon
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    /* const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     if (this.elements.themeToggle) {
       this.elements.themeToggle.querySelector(".theme-icon").textContent = isDark ? "🌙" : "🌞";
-    }
+    } */
   }
   
   toggleTheme() {
@@ -259,9 +259,9 @@ class ChatApp {
       this.addMessage("bot", result.response);
       
       // Auto-save if enabled
-      if (this.settings.autoSave) {
+      //if (this.settings.autoSave) {
         await this.fetchConversations();
-      }
+      //}
     } catch (err) {
       this.hideTypingIndicator();
       this.addMessage("bot", "[Error getting response from server]");
@@ -538,9 +538,9 @@ class ChatApp {
     if (this.elements.modelSelectSettings) {
       this.elements.modelSelectSettings.value = this.currentModel;
     }
-    if (this.elements.autoSave) {
+    /*if (this.elements.autoSave) {
       this.elements.autoSave.checked = this.settings.autoSave;
-    }
+    }*/
     if (this.elements.messageLimit) {
       this.elements.messageLimit.value = this.settings.messageLimit;
     }
@@ -551,9 +551,9 @@ class ChatApp {
     if (this.elements.themeSelect) {
       this.settings.theme = this.elements.themeSelect.value;
     }
-    if (this.elements.autoSave) {
+    /*if (this.elements.autoSave) {
       this.settings.autoSave = this.elements.autoSave.checked;
-    }
+    }*/
     if (this.elements.messageLimit) {
       this.settings.messageLimit = parseInt(this.elements.messageLimit.value);
     }
@@ -615,7 +615,7 @@ class ChatApp {
   getDefaultSettings() {
     return {
       theme: "dark",
-      autoSave: true,
+      //autoSave: true,
       messageLimit: 100
     };
   }
@@ -632,7 +632,7 @@ class ChatApp {
     notification.textContent = message;
     notification.style.cssText = `
       position: fixed;
-      top: 15px;
+      top: 10px;
       right: 20px;
       padding: 12px 20px;
       border-radius: 8px;
