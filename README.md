@@ -9,13 +9,13 @@ It supports structured prompts, command-based interaction, multimodal capabiliti
 
 The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacting with the GroqSharp WebAPI.
 
-Dark Mode
+**Dark Mode**
 
-![GroqSharp Dark](https://github.com/user-attachments/assets/5717d347-b515-4f82-97a1-0bcc2a28cfa5)
+![GroqSharp Dark](https://github.com/user-attachments/assets/5301e27c-c245-421b-870f-9fca90047249)
 
-Light Mode
+**Light Mode**
 
-![GroqSharp Light](https://github.com/user-attachments/assets/3b1b3bec-b74a-42e9-8f08-f66f89f43d9a)
+![GroqSharp Light](https://github.com/user-attachments/assets/d57306f5-f8e3-429f-847b-934363a98080)
 
 ## Features
 
