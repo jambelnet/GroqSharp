@@ -904,3 +904,11 @@ select:focus-visible {
   stroke: currentColor;
   display: block;
 }
+
+.menu-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+  stroke: currentColor;
+}

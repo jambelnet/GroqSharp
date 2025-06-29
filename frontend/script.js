@@ -403,7 +403,14 @@ class ChatApp {
     
     const renameBtn = document.createElement("button");
     renameBtn.className = "dropdown-item";
-    renameBtn.textContent = "Rename";
+    //renameBtn.textContent = "Rename";
+	renameBtn.innerHTML = `
+	  <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<path d="M12 20h9"/>
+		<path d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z"/>
+	  </svg>
+	  Rename
+	`;
     renameBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.renameConversation(conversation);
@@ -412,7 +419,16 @@ class ChatApp {
     
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "dropdown-item";
-    deleteBtn.textContent = "Delete";
+    //deleteBtn.textContent = "Delete";
+	deleteBtn.innerHTML = `
+	  <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<polyline points="3 6 5 6 21 6"/>
+		<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+		<path d="M10 11v6M14 11v6"/>
+		<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+	  </svg>
+	  Delete
+	`;
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.deleteConversation(conversation.sessionId);
