@@ -26,7 +26,7 @@ The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacti
 - Speech-to-Text using `whisper-large-v3-turbo` (verbose JSON)
 - API key and model configuration via `appsettings.json`
 - File import support (`.pdf`, `.docx`, `.html`) in CLI
-- Auto-save and archive chat sessions (CLI & Web API)
+- Auto-save and archive chat sessions using in-memory sessions with persistent JSON backing (CLI & Web API)
 - Conversation export and title/preview management
 - Model switching and listing (CLI & Web API)
 - Slash commands and REST endpoints
@@ -77,22 +77,32 @@ Sample `appsettings.json`:
 
 ## Web API Endpoints
 
-- `POST /api/conversations/{sessionId}/chat/messages`  
-  Submit a message to the chat session
+### Chat
 
-- `GET /api/conversations/{sessionId}/history`  
-  Fetch chat history
+- `POST /api/conversations/{sessionId}/chat/messages` — Submit a message to the chat session
 
-- `DELETE /api/conversations/{sessionId}`  
-  Delete a saved session
+### Session Management
+
+- `POST /api/conversations/{sessionId}/new` — Create or load a conversation with optional title
+
+- `POST /api/conversations/{sessionId}/clear` — Clears the conversation history
+
+- `POST /api/conversations/{sessionId}/rename?newTitle=CustomTitle` — Renames a session
+
+- `DELETE /api/conversations/{sessionId}` — Deletes the session file
+
+- `GET /api/conversations/{sessionId}/load` — Returns session title and current memory state
+
+- `GET /api/conversations/{sessionId}/history` — Returns the full conversation history
+
+### Model
+
+- `GET /api/model/list` — List available models
 
 - `POST /api/model/set`  
   ```json
   { "model": "llama-3.3-70b-versatile" }
   ```
-
-- `GET /api/model/list`  
-  List available models
 
 ## CLI Slash Commands
 
@@ -235,6 +245,13 @@ var service = provider.GetRequiredService<IGroqService>();
 
 var result = await service.GetChatCompletionAsync("Tell me a joke");
 ```
+
+## Design Notes
+
+GroqSharp separates conversation persistence (`ConversationSession`) from runtime memory (`ConversationService`). Web API and CLI both create a `ConversationService` per request/session context to ensure clean state management. Sessions are persisted in JSON files and rehydrated on load or message send.
+
+- `ConversationService` holds the runtime chat state and is re-created per session use.
+- `ConversationSession` holds the flat, serializable session data: `SessionId`, `Title`, `Model`, and `Messages`.
 
 ## License
 
