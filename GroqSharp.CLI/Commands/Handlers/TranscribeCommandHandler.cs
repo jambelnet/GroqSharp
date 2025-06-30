@@ -14,7 +14,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             _speechService = speechService;
         }
 
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/transcribe", StringComparison.OrdinalIgnoreCase))
                 return false;

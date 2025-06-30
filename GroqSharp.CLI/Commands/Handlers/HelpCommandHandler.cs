@@ -5,7 +5,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class HelpCommandHandler : ICommandProcessor
     {
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/help", StringComparison.OrdinalIgnoreCase))
                 return false;

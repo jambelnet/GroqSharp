@@ -5,7 +5,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ExitCommandHandler : ICommandProcessor
     {
-        public Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/exit", StringComparison.OrdinalIgnoreCase))
                 return Task.FromResult(false);

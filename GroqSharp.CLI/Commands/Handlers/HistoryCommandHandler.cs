@@ -5,7 +5,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class HistoryCommandHandler : ICommandProcessor
     {
-        public Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/history", StringComparison.OrdinalIgnoreCase))
                 return Task.FromResult(false);

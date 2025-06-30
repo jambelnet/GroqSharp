@@ -1,4 +1,5 @@
 ﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GroqSharp.WebAPI.Controllers
@@ -25,17 +26,18 @@ namespace GroqSharp.WebAPI.Controllers
         public async Task<IActionResult> NewSession(string sessionId, [FromQuery] string? title)
         {
             var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
             session.Title = title ?? session.Title;
-            await _conversationService.SaveSessionAsync(sessionId);
+            await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
             return Ok(new { message = "New session started.", sessionId, title = session.Title });
         }
 
         [HttpPost("{sessionId}/clear")]
         public async Task<IActionResult> Clear(string sessionId)
         {
-            var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
-            session.Conversation.ClearHistory();
-            await _conversationService.SaveSessionAsync(sessionId);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            sessionContext.Conversation.ClearHistory();
+            await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
             return Ok(new { message = "Conversation cleared." });
         }
 
@@ -57,15 +59,15 @@ namespace GroqSharp.WebAPI.Controllers
         public async Task<IActionResult> Load(string sessionId)
         {
             var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
-            return Ok(new { session.Title, session.Conversation });
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            return Ok(new { session.Title, sessionContext.Conversation });
         }
 
         [HttpGet("{sessionId}/history")]
         public async Task<IActionResult> GetHistory(string sessionId)
         {
-            var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
-            var history = session.Conversation.GetFullHistory();
-
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var history = sessionContext.Conversation.GetFullHistory();
             return Ok(history);
         }
     }

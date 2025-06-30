@@ -1,5 +1,6 @@
 ﻿using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
@@ -37,11 +38,7 @@ namespace GroqSharp.Core.Services
                 reasoning_effort = model.Contains("qwen") ? reasoningEffort : null
             };
 
-            var json = JsonSerializer.Serialize(requestPayload, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            });
+            var json = JsonSerializer.Serialize(requestPayload, JsonDefaults.InWhenWritingNulldented);
 
             var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
             {

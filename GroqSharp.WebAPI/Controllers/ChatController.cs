@@ -41,7 +41,7 @@ namespace GroqSharp.WebAPI.Controllers
             });
 
             sessionContext.Conversation.AddMessage("assistant", response);
-            await _conversationService.SaveSessionAsync(sessionId);
+            await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
 
             return Ok(new { response });
         }

@@ -7,7 +7,8 @@ namespace GroqSharp.Core.Models
     {
         public string SessionId { get; set; }
         public string Title { get; set; }
-        public ConversationService Conversation { get; set; }
+        public string Model { get; set; } = ConversationService.DefaultModel;
+        public List<Message> Messages { get; set; } = new();
         public DateTime LastModified { get; set; }
 
         [JsonIgnore]

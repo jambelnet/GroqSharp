@@ -5,7 +5,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ModelsCommandHandler : ICommandProcessor
     {
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/models", StringComparison.OrdinalIgnoreCase))
                 return false;

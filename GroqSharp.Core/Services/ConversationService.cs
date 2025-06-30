@@ -7,38 +7,51 @@ namespace GroqSharp.Core.Services
     {
         private readonly object _lock = new();
         private readonly int _maxHistoryLength;
-        private string _sessionId;
         private readonly IGlobalConversationService _globalConversationService;
         private readonly List<Message> _messages = new();
+
+        private string _sessionId;
 
         public const string DefaultModel = "llama-3.3-70b-versatile";
         public string CurrentModel { get; set; } = DefaultModel;
 
         public ConversationService(
+            IGlobalConversationService globalConversationService,
             int maxHistoryLength = 100)
         {
+            _globalConversationService = globalConversationService
+                ?? throw new ArgumentNullException(nameof(globalConversationService));
             _maxHistoryLength = maxHistoryLength;
         }
 
-        public void Initialize(string sessionId)
+        public void LoadFromSession(ConversationSession session)
         {
-            _sessionId = sessionId;
+            if (session == null)
+                throw new ArgumentNullException(nameof(session));
+
+            _sessionId = session.SessionId;
+            CurrentModel = session.Model ?? DefaultModel;
+
+            if (session.Messages?.Any() == true)
+            {
+                LoadMessages(session.Messages);
+            }
         }
 
         public void AddMessage(string role, string content)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
+
             lock (_lock)
             {
                 _messages.Add(new Message { Role = role, Content = content });
 
-                // Trim oldest messages if over limit
                 while (_messages.Count > _maxHistoryLength)
                 {
                     _messages.RemoveAt(0);
                 }
             }
 
-            // Fire-and-forget auto-save
             _ = TryAutoSave();
         }
 
@@ -47,31 +60,7 @@ namespace GroqSharp.Core.Services
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            string content = message.Content?.ToString() ?? string.Empty;
-            AddMessage(message.Role, content);
-        }
-
-        private async Task TryAutoSave()
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(_sessionId))
-                {
-                    await _globalConversationService.SaveSessionAsync(_sessionId);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Auto-save failed: {ex.Message}");
-            }
-        }
-
-        public async Task SaveAsync()
-        {
-            if (!string.IsNullOrEmpty(_sessionId))
-            {
-                await _globalConversationService.SaveSessionAsync(_sessionId);
-            }
+            AddMessage(message.Role, message.Content?.ToString() ?? string.Empty);
         }
 
         public Message[] GetApiMessages()
@@ -79,23 +68,6 @@ namespace GroqSharp.Core.Services
             lock (_lock)
             {
                 return _messages.ToArray();
-            }
-        }
-
-        public void LoadMessages(IEnumerable<Message> messages)
-        {
-            lock (_lock)
-            {
-                _messages.Clear();
-                _messages.AddRange(messages);
-            }
-        }
-
-        public IEnumerable<Message> GetHistory()
-        {
-            lock (_lock)
-            {
-                return _messages.AsReadOnly();
             }
         }
 
@@ -107,11 +79,47 @@ namespace GroqSharp.Core.Services
             }
         }
 
+        public IEnumerable<Message> GetHistory() => GetFullHistory();
+
+        public void LoadMessages(IEnumerable<Message> messages)
+        {
+            if (messages == null) return;
+
+            lock (_lock)
+            {
+                _messages.Clear();
+                _messages.AddRange(messages);
+            }
+        }
+
         public void ClearHistory()
         {
             lock (_lock)
             {
                 _messages.Clear();
+            }
+        }
+
+        public async Task SaveAsync()
+        {
+            if (!string.IsNullOrEmpty(_sessionId))
+            {
+                await _globalConversationService.SaveSessionAsync(_sessionId, this);
+            }
+        }
+
+        private async Task TryAutoSave()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_sessionId))
+                {
+                    await _globalConversationService.SaveSessionAsync(_sessionId, this);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Auto-save failed: {ex.Message}");
             }
         }
     }

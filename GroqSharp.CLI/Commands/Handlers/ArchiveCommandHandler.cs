@@ -14,7 +14,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             _conversationService = conversationService;
         }
 
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/archive", StringComparison.OrdinalIgnoreCase))
                 return false;
@@ -41,7 +41,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                         break;
                     }
                     var session = await _conversationService.GetOrCreateSessionAsync(args[1]);
-                    await context.InitializeSession(args[1], session.Title);
+                    await context.InitializeAsync(args[1], session.Title);
                     Console.WriteLine($"Loaded conversation: {session.Title}");
                     break;
 

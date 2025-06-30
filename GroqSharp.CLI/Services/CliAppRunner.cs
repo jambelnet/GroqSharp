@@ -15,12 +15,11 @@ namespace GroqSharp.CLI.Services
 
             var groqService = scopedProvider.GetRequiredService<IGroqService>();
             var dispatcher = scopedProvider.GetRequiredService<CommandDispatcher>();
-            var context = scopedProvider.GetRequiredService<CommandContext>();
+            var context = scopedProvider.GetRequiredService<CliSessionContext>();
 
-            context.GroqService = groqService;
             context.CurrentModel = scopedProvider.GetRequiredService<IConfiguration>()["Groq:DefaultModel"];
 
-            await context.InitializeSession(Guid.NewGuid().ToString());
+            await context.InitializeAsync(Guid.NewGuid().ToString());
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Groq API Client");
@@ -56,7 +55,7 @@ namespace GroqSharp.CLI.Services
             }
         }
 
-        private static async Task ProcessAiInput(string input, CommandContext context)
+        private static async Task ProcessAiInput(string input, CliSessionContext context)
         {
             try
             {

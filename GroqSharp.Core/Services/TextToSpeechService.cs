@@ -1,5 +1,6 @@
 ﻿using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
@@ -31,11 +32,7 @@ namespace GroqSharp.Core.Services
                 response_format = "wav"
             };
 
-            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            });
+            var json = JsonSerializer.Serialize(payload, JsonDefaults.InWhenWritingNulldented);
 
             var request = new HttpRequestMessage(HttpMethod.Post, "audio/speech")
             {

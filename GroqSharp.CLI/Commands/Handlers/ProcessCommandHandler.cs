@@ -6,7 +6,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ProcessCommandHandler : ICommandProcessor
     {
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/process", StringComparison.OrdinalIgnoreCase))
                 return false;

@@ -15,7 +15,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             _visionService = visionService;
         }
 
-        public async Task<bool> ProcessCommand(string command, string[] args, CommandContext context)
+        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/vision", StringComparison.OrdinalIgnoreCase))
                 return false;

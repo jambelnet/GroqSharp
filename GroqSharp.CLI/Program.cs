@@ -16,7 +16,7 @@ class Program
 
             services.AddGroqSharpCore(config);
             services.AddGroqSharpCommands();
-            services.AddScoped<CommandContext>();
+            services.AddScoped<CliSessionContext>();
 
             using var provider = services.BuildServiceProvider();
             await CliAppRunner.RunAsync(provider); // central command loop

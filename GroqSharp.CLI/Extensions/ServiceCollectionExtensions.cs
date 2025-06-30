@@ -1,6 +1,7 @@
 ﻿using GroqSharp.CLI.Commands.Handlers;
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Routing;
+using GroqSharp.CLI.Commands.Services;
 using GroqSharp.CLI.Services;
 using GroqSharp.Core.Extensions;
 using GroqSharp.Core.Services;
@@ -36,6 +37,7 @@ namespace GroqSharp.CLI.Extensions
 
             // Routing/dispatch
             services.AddSingleton<ICommandRouter, CommandRouter>();
+            services.AddSingleton<ICommandExecutor, CommandExecutor>();
             services.AddSingleton<CommandDispatcher>();
 
             return services;

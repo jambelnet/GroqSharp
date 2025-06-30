@@ -10,7 +10,6 @@ namespace GroqSharp.Core.Services
     {
         private readonly string _storagePath;
         private readonly ConcurrentDictionary<string, ConversationSession> _activeSessions = new();
-        private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
         public GlobalConversationService()
         {
@@ -29,7 +28,6 @@ namespace GroqSharp.Core.Services
             var session = new ConversationSession
             {
                 SessionId = sessionId,
-                Conversation = new ConversationService(),
                 Title = "New Conversation",
                 LastModified = DateTime.UtcNow
             };
@@ -39,38 +37,39 @@ namespace GroqSharp.Core.Services
             return session;
         }
 
-        public async Task SaveSessionAsync(string sessionId)
+        public async Task SaveSessionAsync(string sessionId, ConversationService conversation)
         {
             if (_activeSessions.TryGetValue(sessionId, out var session))
             {
                 try
                 {
                     session.LastModified = DateTime.UtcNow;
+                    session.Messages = conversation.GetFullHistory().ToList();
+                    session.Model = conversation.CurrentModel;
+
                     var filePath = GetSessionFilePath(sessionId);
                     var storageData = new ConversationData
                     {
                         Title = session.Title,
                         LastModified = session.LastModified,
-                        Messages = session.Conversation.GetHistory().ToList()
+                        Messages = session.Messages ?? new List<Message>(),
+                        Model = session.Model ?? ConversationService.DefaultModel
                     };
 
                     await File.WriteAllTextAsync(filePath,
-                        JsonSerializer.Serialize(storageData, _jsonOptions));
+                        JsonSerializer.Serialize(storageData, JsonDefaults.WriteIndented));
+                }
+                catch (IOException ioEx)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine($"[Warning] Could not save session '{sessionId}' — file is in use: {ioEx.Message}");
+                    Console.ResetColor();
                 }
                 catch (Exception ex)
                 {
-                    // Log error here
                     Console.WriteLine($"Failed to save session {sessionId}: {ex.Message}");
                     throw;
                 }
-            }
-        }
-
-        public async Task AutoSaveAllAsync()
-        {
-            foreach (var sessionId in _activeSessions.Keys)
-            {
-                await SaveSessionAsync(sessionId);
             }
         }
 
@@ -115,8 +114,7 @@ namespace GroqSharp.Core.Services
             if (_activeSessions.TryGetValue(sessionId, out var session))
             {
                 session.Title = newTitle;
-                await SaveSessionAsync(sessionId);
-                return true;
+                return await RenameAndSaveSessionFile(sessionId, session.Title);
             }
 
             if (File.Exists(filePath))
@@ -126,7 +124,7 @@ namespace GroqSharp.Core.Services
                     var data = await LoadConversationFile(filePath);
                     data.Title = newTitle;
                     data.LastModified = DateTime.UtcNow;
-                    await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(data, _jsonOptions));
+                    await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(data, JsonDefaults.WriteIndented));
                     return true;
                 }
                 catch
@@ -136,6 +134,26 @@ namespace GroqSharp.Core.Services
             }
 
             return false;
+        }
+
+        private async Task<bool> RenameAndSaveSessionFile(string sessionId, string newTitle)
+        {
+            var filePath = GetSessionFilePath(sessionId);
+
+            if (!File.Exists(filePath)) return false;
+
+            try
+            {
+                var data = await LoadConversationFile(filePath);
+                data.Title = newTitle;
+                data.LastModified = DateTime.UtcNow;
+                await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(data, JsonDefaults.WriteIndented));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<bool> DeleteConversationAsync(string sessionId)
@@ -161,7 +179,10 @@ namespace GroqSharp.Core.Services
             if (File.Exists(filePath))
             {
                 var data = await LoadConversationFile(filePath);
-                session.Conversation.LoadMessages(data.Messages);
+
+                // hydrate flat fields
+                session.Messages = data.Messages ?? new List<Message>();
+                session.Model = data.Model ?? ConversationService.DefaultModel;
                 session.Title = data.Title;
                 session.LastModified = data.LastModified;
             }

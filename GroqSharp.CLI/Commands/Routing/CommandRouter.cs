@@ -12,7 +12,7 @@ namespace GroqSharp.CLI.Commands.Routing
             _handlers = handlers;
         }
 
-        public async Task<bool> RouteCommand(string input, CommandContext context)
+        public async Task<bool> RouteCommand(string input, CliSessionContext context)
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
 
@@ -29,7 +29,7 @@ namespace GroqSharp.CLI.Commands.Routing
             return false;
         }
 
-        public async Task<string?> RunCommandAsync(string commandLine, CommandContext context)
+        public async Task<string?> RunCommandAsync(string commandLine, CliSessionContext context)
         {
             var parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var command = parts[0];

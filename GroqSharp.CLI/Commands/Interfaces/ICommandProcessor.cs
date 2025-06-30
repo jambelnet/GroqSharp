@@ -4,7 +4,7 @@ namespace GroqSharp.CLI.Commands.Interfaces
 {
     public interface ICommandProcessor
     {
-        Task<bool> ProcessCommand(string command, string[] args, CommandContext context);
+        Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context);
         IEnumerable<string> GetAvailableCommands();
     }
 }

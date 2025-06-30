@@ -11,7 +11,7 @@ namespace GroqSharp.CLI.Commands.Interfaces
         /// <param name="input">The full command line input, e.g. "/vision https://url image prompt"</param>
         /// <param name="context">The current command execution context.</param>
         /// <returns>True if a handler was found and executed successfully; otherwise, false.</returns>
-        Task<bool> RouteCommand(string input, CommandContext context);
+        Task<bool> RouteCommand(string input, CliSessionContext context);
 
         /// <summary>
         /// Routes and executes a command, returning any string output (e.g. for export).
@@ -19,6 +19,6 @@ namespace GroqSharp.CLI.Commands.Interfaces
         /// <param name="commandLine">The command line input to execute.</param>
         /// <param name="context">The current command execution context.</param>
         /// <returns>The output string if produced by the command; otherwise, null.</returns>
-        Task<string?> RunCommandAsync(string commandLine, CommandContext context);
+        Task<string?> RunCommandAsync(string commandLine, CliSessionContext context);
     }
 }

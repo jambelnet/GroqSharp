@@ -13,7 +13,7 @@ namespace GroqSharp.CLI.Services
             _commandProcessors = processors.ToList();
         }
 
-        public async Task<bool> Dispatch(string input, CommandContext context)
+        public async Task<bool> Dispatch(string input, CliSessionContext context)
         {
             if (!input.StartsWith("/"))
                 return false;

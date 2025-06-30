@@ -97,9 +97,8 @@ namespace GroqSharp.Core.Helpers
                     DefaultMaxTokens = maxTokens,
                 }
             };
-
             await File.WriteAllTextAsync(outputFile,
-                JsonSerializer.Serialize(finalConfig, new JsonSerializerOptions { WriteIndented = true }));
+                JsonSerializer.Serialize(finalConfig, JsonDefaults.WriteIndented));
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nConfiguration file created successfully!");
