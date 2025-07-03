@@ -221,7 +221,7 @@ print("Hello, World!")
 
 Use the `--exclude` and `--include` flags to filter search domains and the `--country` flag to restrict results by country. The `--verbose` flag shows detailed executed tool information.
 
-** Notes **
+**Notes**
 
 - Agentic tooling commands enhance interaction by allowing fine-grained control over search filters and tool execution
 - Details of executed tools (name, input, output) are shown in verbose or summary modes to enhance transparency and debugging
