@@ -26,7 +26,9 @@ namespace GroqSharp.CLI.Commands.Handlers
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                     Console.WriteLine($"- {model}");
                 }
-                Console.WriteLine($"\nDefault: {defaultModel}");
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"\nDefault Model: {defaultModel}");
                 Console.ResetColor();
             }
             catch (Exception ex)

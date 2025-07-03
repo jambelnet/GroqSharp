@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 
@@ -7,11 +8,13 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class ReasonCommandHandler : ICommandProcessor
     {
-        private readonly IGroqService _groqService;
+        private readonly IReasoningService _reasoningService;
+        private readonly IModelResolver _modelResolver;
 
-        public ReasonCommandHandler(IGroqService groqService)
+        public ReasonCommandHandler(IReasoningService reasoningService, IModelResolver modelResolver)
         {
-            _groqService = groqService;
+            _reasoningService = reasoningService;
+            _modelResolver = modelResolver;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
@@ -21,44 +24,22 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             var prompt = args.Length > 0 ? string.Join(" ", args) : context.Prompt("Enter reasoning prompt: ");
 
-            context.Conversation.AddMessage(new Message
-            {
-                Role = "user",
-                Content = prompt
-            });
+            context.Conversation.AddMessage(new Message { Role = "user", Content = prompt });
 
             try
             {
-                var request = new ChatRequest
-                {
-                    Model = context.CurrentModel,
-                    Messages = context.Conversation.GetApiMessages(),
-                    Temperature = 0.6,
-                    MaxTokens = 1024,
-                    TopP = 0.95,
-                    Stream = false
-                };
+                var model = _modelResolver.GetModelFor(command);
+                var content = await _reasoningService.AnalyzeAsync(prompt, model);
 
-                if (SupportsReasoningFormat(context.CurrentModel))
-                    request.ReasoningFormat = "raw";
+                var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
 
-                if (SupportsReasoningEffort(context.CurrentModel))
-                    request.ReasoningEffort = "default";
-
-                var result = await _groqService.GetStructuredResponseAsync(request);
-                var content = result?.Choices?.FirstOrDefault()?.Message?.Content ?? "(no response)";
-
-                context.Conversation.AddMessage(new Message
-                {
-                    Role = "assistant",
-                    Content = content
-                });
+                context.Conversation.AddMessage(new Message { Role = "assistant", Content = extractedContent });
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nReasoning Output:\n" + content);
+                Console.WriteLine("\nReasoning Output:\n" + extractedContent);
                 Console.ResetColor();
 
-                context.PreviousCommandResult = content;
+                context.PreviousCommandResult = extractedContent;
             }
             catch (Exception ex)
             {
@@ -71,12 +52,5 @@ namespace GroqSharp.CLI.Commands.Handlers
         }
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/reason" };
-
-        private static bool SupportsReasoningFormat(string model) =>
-            model.Contains("deepseek", StringComparison.OrdinalIgnoreCase) ||
-            model.Contains("qwen", StringComparison.OrdinalIgnoreCase);
-
-        private static bool SupportsReasoningEffort(string model) =>
-            model.Contains("qwen3-32b", StringComparison.OrdinalIgnoreCase);
     }
 }

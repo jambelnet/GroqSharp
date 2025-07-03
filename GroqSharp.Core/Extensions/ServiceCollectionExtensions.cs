@@ -14,6 +14,7 @@ namespace GroqSharp.Core.Extensions
         {
             // Configuration
             services.AddSingleton(config);
+            services.AddSingleton<IModelResolver, ModelResolver>();
             services.Configure<GroqConfiguration>(config.GetSection("Groq"));
             services.AddSingleton<IGroqConfigurationService, GroqConfigurationService>();
             services.AddSingleton<ModelConfigurationService>();

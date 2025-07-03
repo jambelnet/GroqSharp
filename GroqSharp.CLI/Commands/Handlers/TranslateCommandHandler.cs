@@ -1,17 +1,19 @@
-﻿using GroqSharp.CLI.Commands.Interfaces;
+﻿using GroqSharp.Core.Interfaces;
+using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
-using GroqSharp.Core.Interfaces;
-using System.Text.Json;
+using GroqSharp.Core.Helpers;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
     public class TranslateCommandHandler : ICommandProcessor
     {
         private readonly ITranslationService _translationService;
+        private readonly IModelResolver _modelResolver;
 
-        public TranslateCommandHandler(ITranslationService translationService)
+        public TranslateCommandHandler(ITranslationService translationService, IModelResolver modelResolver)
         {
             _translationService = translationService;
+            _modelResolver = modelResolver;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
@@ -19,19 +21,20 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/translate", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var path = args.FirstOrDefault() ?? context.Prompt("Enter audio file path to translate: ");
+            var filePath = args.FirstOrDefault() ?? context.Prompt("Enter audio file path to translate: ");
 
             try
             {
-                var result = await _translationService.TranslateAudioAsync(path);
+                var model = _modelResolver.GetModelFor(command);
+                var content = await _translationService.TranslateAudioAsync(filePath, model);
 
-                string? text = TryExtractContent(result);
+                var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nTranslation Result:\n" + (text ?? result));
+                Console.WriteLine("\nTranslation Result:\n" + extractedContent);
                 Console.ResetColor();
 
-                context.PreviousCommandResult = text ?? result;
+                context.PreviousCommandResult = extractedContent;
             }
             catch (Exception ex)
             {
@@ -41,19 +44,6 @@ namespace GroqSharp.CLI.Commands.Handlers
             }
 
             return true;
-        }
-
-        private static string? TryExtractContent(string json)
-        {
-            try
-            {
-                using var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("text", out var textProp))
-                    return textProp.GetString();
-            }
-            catch { }
-
-            return null;
         }
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/translate" };

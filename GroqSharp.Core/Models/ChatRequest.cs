@@ -69,5 +69,12 @@ namespace GroqSharp.Core.Models
         /// </summary>
         [JsonPropertyName("reasoning_effort")]
         public string? ReasoningEffort { get; set; }
+
+        /// <summary>
+        /// Settings to customize web search behavior, such as including or excluding specific domains
+        /// and boosting results from a particular country. Applies when using agentic tooling models.
+        /// </summary>
+        [JsonPropertyName("search_settings")]
+        public SearchSettings? SearchSettings { get; set; }
     }
 }

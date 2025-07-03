@@ -2,6 +2,6 @@
 {
     public interface IVisionService
     {
-        Task<string> AnalyzeImageAsync(string imagePathOrUrl, string prompt);
+        Task<string> AnalyzeImageAsync(string imagePathOrUrl, string prompt, string? model = null);
     }
 }

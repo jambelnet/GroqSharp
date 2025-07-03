@@ -21,53 +21,46 @@ namespace GroqSharp.CLI.Commands.Handlers
                 Console.ResetColor();
 
                 var textContent = FileProcessor.ExtractTextFromFile(filePath);
+
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine($"\nFile content ({Path.GetFileName(filePath)}):");
                 Console.ResetColor();
+
                 Console.WriteLine(textContent.Length > 500
                     ? textContent.Substring(0, 500) + "..."
                     : textContent);
 
-                if (context.PromptYesNo("\nProcess this content? (y/n): "))
+                if (!context.PromptYesNo("\nProcess this content"))
                 {
-                    var response = await context.GroqService.GetChatCompletionAsync(
-                        $"Process this document content:\n{textContent}");
-
-                    // Store result for potential export
-                    context.PreviousCommandResult = response;
-
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"\nAI Response:\n{response}");
-                    Console.ResetColor();
-
-                    try
-                    {
-                        if (context.PromptYesNo("\nExport this response? (y/n): "))
-                        {
-                            var outputPath = context.Prompt("Enter output path (default extension .txt): ");
-                            if (string.IsNullOrWhiteSpace(outputPath))
-                                return true;
-                            FileProcessor.ExportToFile(response, outputPath);
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"Exported to {outputPath}");
-                            Console.ResetColor();
-                        }
-                    }
-                    finally
-                    {
-                        // Clear regardless of whether user chose to export or not
-                        context.PreviousCommandResult = null;
-                    }
-                }
-                else
-                {
-                    // Clear if user chose not to process
                     context.PreviousCommandResult = null;
+                    return true;
                 }
+
+                var response = await context.GroqService.GetChatCompletionAsync(
+                    $"Process this document content:\n{textContent}");
+
+                context.PreviousCommandResult = response;
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\nAI Response:\n{response}");
+                Console.ResetColor();
+
+                if (context.PromptYesNo("\nExport this response"))
+                {
+                    var outputPath = context.Prompt("Enter output path (default extension .txt): ");
+                    if (!string.IsNullOrWhiteSpace(outputPath))
+                    {
+                        FileProcessor.ExportToFile(response, outputPath);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Exported to {outputPath}");
+                        Console.ResetColor();
+                    }
+                }
+
+                context.PreviousCommandResult = null;
             }
             catch (Exception ex)
             {
-                // Clear on error too
                 context.PreviousCommandResult = null;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Error: {ex.Message}");

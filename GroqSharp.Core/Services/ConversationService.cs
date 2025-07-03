@@ -3,6 +3,9 @@ using GroqSharp.Core.Models;
 
 namespace GroqSharp.Core.Services
 {
+    /// <summary>
+    /// Manages conversation messages with auto-saving and history limits.
+    /// </summary>
     public class ConversationService : IAutoSaveConversation
     {
         private readonly object _lock = new();
@@ -13,6 +16,8 @@ namespace GroqSharp.Core.Services
         private string _sessionId;
 
         public const string DefaultModel = "llama-3.3-70b-versatile";
+
+        /// <summary>Current model in use for the conversation.</summary>
         public string CurrentModel { get; set; } = DefaultModel;
 
         public ConversationService(
@@ -24,6 +29,9 @@ namespace GroqSharp.Core.Services
             _maxHistoryLength = maxHistoryLength;
         }
 
+        /// <summary>
+        /// Loads conversation data from a saved session.
+        /// </summary>
         public void LoadFromSession(ConversationSession session)
         {
             if (session == null)
@@ -38,13 +46,14 @@ namespace GroqSharp.Core.Services
             }
         }
 
-        public void AddMessage(string role, string content)
+        /// <summary>
+        /// Internal shared method to add a message safely and trim history.
+        /// </summary>
+        private void AddMessageInternal(Message message)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(role);
-
             lock (_lock)
             {
-                _messages.Add(new Message { Role = role, Content = content });
+                _messages.Add(message);
 
                 while (_messages.Count > _maxHistoryLength)
                 {
@@ -55,14 +64,28 @@ namespace GroqSharp.Core.Services
             _ = TryAutoSave();
         }
 
+        /// <summary>
+        /// Adds a message by role and content.
+        /// </summary>
+        public void AddMessage(string role, string content)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
+            AddMessageInternal(new Message { Role = role, Content = content });
+        }
+
+        /// <summary>
+        /// Adds a message object.
+        /// </summary>
         public void AddMessage(Message message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
-            AddMessage(message.Role, message.Content?.ToString() ?? string.Empty);
+            AddMessageInternal(message);
         }
 
+        /// <summary>
+        /// Gets a snapshot of messages suitable for API calls.
+        /// </summary>
         public Message[] GetApiMessages()
         {
             lock (_lock)
@@ -71,6 +94,9 @@ namespace GroqSharp.Core.Services
             }
         }
 
+        /// <summary>
+        /// Gets a read-only list of all messages in history.
+        /// </summary>
         public IReadOnlyList<Message> GetFullHistory()
         {
             lock (_lock)
@@ -79,11 +105,13 @@ namespace GroqSharp.Core.Services
             }
         }
 
-        public IEnumerable<Message> GetHistory() => GetFullHistory();
-
+        /// <summary>
+        /// Loads a new set of messages, replacing existing history.
+        /// </summary>
         public void LoadMessages(IEnumerable<Message> messages)
         {
-            if (messages == null) return;
+            if (messages?.Any() != true)
+                return;
 
             lock (_lock)
             {
@@ -92,6 +120,9 @@ namespace GroqSharp.Core.Services
             }
         }
 
+        /// <summary>
+        /// Clears the conversation history.
+        /// </summary>
         public void ClearHistory()
         {
             lock (_lock)
@@ -100,6 +131,9 @@ namespace GroqSharp.Core.Services
             }
         }
 
+        /// <summary>
+        /// Saves the current conversation asynchronously.
+        /// </summary>
         public async Task SaveAsync()
         {
             if (!string.IsNullOrEmpty(_sessionId))
@@ -108,6 +142,9 @@ namespace GroqSharp.Core.Services
             }
         }
 
+        /// <summary>
+        /// Attempts an auto-save, logging any failures.
+        /// </summary>
         private async Task TryAutoSave()
         {
             try

@@ -45,7 +45,6 @@ namespace GroqSharp.Core.Services
                 {
                     session.LastModified = DateTime.UtcNow;
                     session.Messages = conversation.GetFullHistory().ToList();
-                    session.Model = conversation.CurrentModel;
 
                     var filePath = GetSessionFilePath(sessionId);
                     var storageData = new ConversationData
@@ -53,7 +52,6 @@ namespace GroqSharp.Core.Services
                         Title = session.Title,
                         LastModified = session.LastModified,
                         Messages = session.Messages ?? new List<Message>(),
-                        Model = session.Model ?? ConversationService.DefaultModel
                     };
 
                     await File.WriteAllTextAsync(filePath,
@@ -158,15 +156,11 @@ namespace GroqSharp.Core.Services
 
         public async Task<bool> DeleteConversationAsync(string sessionId)
         {
-            var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "GroqSharp",
-                "global_conversations",
-                $"{sessionId}.json");
+            var filePath = GetSessionFilePath(sessionId);
 
-            if (File.Exists(path))
+            if (File.Exists(filePath))
             {
-                File.Delete(path);
+                File.Delete(filePath);
                 return true;
             }
 
@@ -182,7 +176,7 @@ namespace GroqSharp.Core.Services
 
                 // hydrate flat fields
                 session.Messages = data.Messages ?? new List<Message>();
-                session.Model = data.Model ?? ConversationService.DefaultModel;
+                session.Model = ConversationService.DefaultModel;
                 session.Title = data.Title;
                 session.LastModified = data.LastModified;
             }

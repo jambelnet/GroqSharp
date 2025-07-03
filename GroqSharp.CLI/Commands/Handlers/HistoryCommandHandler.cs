@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Models;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -10,13 +11,37 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/history", StringComparison.OrdinalIgnoreCase))
                 return Task.FromResult(false);
 
-            Console.WriteLine("\nConversation History:");
-            foreach (var msg in context.Conversation.GetFullHistory())
+            var history = context.Conversation.GetFullHistory();
+
+            if (history.Count == 0)
+            {
+                Console.WriteLine("No conversation history available.");
+                return Task.FromResult(true);
+            }
+
+            Console.WriteLine("\nConversation History:\n");
+
+            foreach (var msg in history)
             {
                 Console.ForegroundColor = msg.Role == "user" ? ConsoleColor.Cyan : ConsoleColor.Green;
                 Console.WriteLine($"[{msg.Role}] {msg.Content}");
+
+                if (msg.ExecutedTools?.Any() == true)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    foreach (ExecutedTool tool in msg.ExecutedTools)
+                    {
+                        Console.WriteLine($"  Tool: {tool.ToolName}");
+                        Console.WriteLine($"  Input: {tool.Input}");
+                        Console.WriteLine($"  Output: {tool.Output}");
+                        if (tool.Score.HasValue)
+                            Console.WriteLine($"  Score: {tool.Score.Value:F4}");
+                    }
+                }
+
                 Console.ResetColor();
             }
+
             return Task.FromResult(true);
         }
 

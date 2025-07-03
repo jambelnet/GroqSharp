@@ -10,21 +10,23 @@ namespace GroqSharp.Core.Services
 {
     public class VisionService : IVisionService
     {
+        private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
         private readonly GroqConfiguration _settings;
         private readonly string _apiKey;
 
-        public VisionService(HttpClient httpClient, IGroqConfigurationService config)
+        public VisionService(HttpClient httpClient, IGroqConfigurationService config, IModelResolver modelResolver)
         {
             _httpClient = httpClient;
             _settings = config.GetConfiguration();
             _apiKey = _settings.ApiKey;
+            _modelResolver = modelResolver;
         }
 
-        public async Task<string> AnalyzeImageAsync(string imagePathOrUrl, string prompt)
+        public async Task<string> AnalyzeImageAsync(string imagePathOrUrl, string prompt, string? model = null)
         {
             bool isUrl = Uri.IsWellFormedUriString(imagePathOrUrl, UriKind.Absolute);
-            string model = _settings.DefaultVisionModel ?? "meta-llama/llama-4-scout-17b-16e-instruct";
+            string modelToUse = model ?? _modelResolver.GetModelFor("/vision");
 
             object imageBlock;
             if (isUrl)
@@ -87,15 +89,12 @@ namespace GroqSharp.Core.Services
             return await response.Content.ReadAsStringAsync();
         }
 
-        private static string GetMimeTypeFromExtension(string ext)
+        private static string GetMimeTypeFromExtension(string ext) => ext.ToLower() switch
         {
-            return ext.ToLower() switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                _ => "application/octet-stream"
-            };
-        }
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream"
+        };
     }
 }

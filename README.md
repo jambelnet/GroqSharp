@@ -24,6 +24,12 @@ The `frontend/` folder contains a standalone HTML/CSS/JS interface for interacti
 - Vision API support with image URL and base64 input
 - Text-to-Speech via `playai-tts` (WAV output, configurable voices)
 - Speech-to-Text using `whisper-large-v3-turbo` (verbose JSON)
+- Reasoning command support `/reason` for structured step-by-step problem solving with memory
+- Agentic command support `/agent` for structured tool invocation with domain/country filters and detailed tool output
+- Supports command flags like `--summary` and `--verbose` for controlling output verbosity of executed tools
+- Sanitizes message history before sending to API to avoid errors due to tool metadata
+- Captures executed tool input and output, saving them as part of conversation history
+- Supports domain and country filters in search via extended SearchSettings integration
 - API key and model configuration via `appsettings.json`
 - File import support (`.pdf`, `.docx`, `.html`) in CLI
 - Auto-save and archive chat sessions using in-memory sessions with persistent JSON backing (CLI & Web API)
@@ -120,6 +126,7 @@ Sample `appsettings.json`:
 - `/translate` – Translate non-English audio to English
 - `/vision` – Analyze an image (URL or file)
 - `/reason` - Solve problems step-by-step using structured reasoning with memory
+- `/agent` – Use agentic models with structured tool invocation, supporting domain/country filters and output verbosity control
 - `/exit` – Exit the CLI
 - `/help` – Display available commands
 
@@ -205,6 +212,20 @@ I'll use the print function...
 
 print("Hello, World!")
 ```
+
+## Agentic Tooling
+
+```text
+/agent What is the weather in Paris? --verbose --exclude=example.com --country=France
+```
+
+Use the `--exclude` and `--include` flags to filter search domains and the `--country` flag to restrict results by country. The `--verbose` flag shows detailed executed tool information.
+
+** Notes **
+
+- Agentic tooling commands enhance interaction by allowing fine-grained control over search filters and tool execution
+- Details of executed tools (name, input, output) are shown in verbose or summary modes to enhance transparency and debugging
+- Conversations track the full context, including user queries and tool results, ensuring session persistence and export readiness
 
 ## Archive Management
 

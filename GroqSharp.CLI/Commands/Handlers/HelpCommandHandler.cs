@@ -5,46 +5,61 @@ namespace GroqSharp.CLI.Commands.Handlers
 {
     public class HelpCommandHandler : ICommandProcessor
     {
-        public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
+        public Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/help", StringComparison.OrdinalIgnoreCase))
-                return false;
+                return Task.FromResult(false);
 
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("Available commands:\n");
+            Console.WriteLine("\nAvailable commands:\n");
 
-            Console.WriteLine("Session Management:");
-            Console.WriteLine("  /new        - Start a new chat session");
-            Console.WriteLine("  /history    - Show previous conversation messages");
-            Console.WriteLine("  /clear      - Clear the current session");
-            Console.WriteLine("  /archive    - Manage saved conversations (list, load, delete, rename)");
-            Console.WriteLine();
+            PrintSection("Session Management", new[]
+            {
+                ("/new",        "Start a new chat session"),
+                ("/history",    "Show previous conversation messages"),
+                ("/clear",      "Clear the current session"),
+                ("/archive",    "Manage saved conversations (list, load, delete, rename)")
+            });
 
-            Console.WriteLine("Chat Interaction:");
-            Console.WriteLine("  /models     - Show available models");
-            Console.WriteLine("  /setmodel   - Change current model");
-            Console.WriteLine("  /stream     - Start a streaming chat session");
-            Console.WriteLine("  /reason     - Solve problems step-by-step using structured reasoning with memory");
-            Console.WriteLine();
+            PrintSection("Chat Interaction", new[]
+            {
+                ("/models",     "Show available models"),
+                ("/setmodel",   "Change current model"),
+                ("/stream",     "Start a streaming chat session"),
+                ("/reason",     "Solve problems step-by-step using structured reasoning with memory"),
+                ("/agent",      "Use agentic tools like search/code with compound-beta model")
+            });
 
-            Console.WriteLine("Media & File Tools:");
-            Console.WriteLine("  /process    - Process a local file");
-            Console.WriteLine("  /export     - Export AI output to file");
-            Console.WriteLine("  /transcribe - Transcribe audio file to text");
-            Console.WriteLine("  /translate  - Translate non-English audio to English");
-            Console.WriteLine("  /speak      - Convert text to speech (and save audio)");
-            Console.WriteLine("  /vision     - Analyze image content using LLM");
-            Console.WriteLine();
+            PrintSection("Media & File Tools", new[]
+            {
+                ("/process",    "Process a local file"),
+                ("/export",     "Export AI output to file"),
+                ("/transcribe", "Transcribe audio file to text"),
+                ("/translate",  "Translate non-English audio to English"),
+                ("/speak",      "Convert text to speech and save audio"),
+                ("/vision",     "Analyze image content using LLM")
+            });
 
-            Console.WriteLine("System:");
-            Console.WriteLine("  /help       - Show this help");
-            Console.WriteLine("  /exit       - Quit the application");
+            PrintSection("System", new[]
+            {
+                ("/help",       "Show this help"),
+                ("/exit",       "Quit the application")
+            });
 
             Console.ResetColor();
-
-            return true;
+            return Task.FromResult(true);
         }
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/help" };
+
+        private void PrintSection(string title, (string Command, string Description)[] commands)
+        {
+            Console.WriteLine(title + ":");
+            foreach (var (cmd, desc) in commands)
+            {
+                Console.WriteLine($"  {cmd.PadRight(12)} - {desc}");
+            }
+            Console.WriteLine();
+        }
     }
 }

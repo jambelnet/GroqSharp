@@ -7,23 +7,28 @@ namespace GroqSharp.Core.Services
 {
     public class SpeechToTextService : ISpeechToTextService
     {
+        private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
         private readonly GroqConfiguration _settings;
         private readonly string _apiKey;
 
-        public SpeechToTextService(HttpClient httpClient, IGroqConfigurationService config)
+        public SpeechToTextService(HttpClient httpClient, IGroqConfigurationService config, IModelResolver modelResolver)
         {
             _httpClient = httpClient;
             _settings = config.GetConfiguration();
             _apiKey = _settings.ApiKey;
+            _modelResolver = modelResolver;
         }
 
-        public async Task<string> TranscribeAudioAsync(string filePath)
+        public async Task<string> TranscribeAudioAsync(string filePath, string? model = null)
         {
             using var content = new MultipartFormDataContent();
             await using var fileStream = File.OpenRead(filePath);
             content.Add(new StreamContent(fileStream), "file", Path.GetFileName(filePath));
-            content.Add(new StringContent(_settings.DefaultWhisperModel ?? "whisper-large-v3-turbo"), "model");
+
+            var modelToUse = model ?? _modelResolver.GetModelFor("/transcribe");
+            content.Add(new StringContent(modelToUse), "model");
+
             content.Add(new StringContent("verbose_json"), "response_format");
             content.Add(new StringContent("0"), "temperature");
 

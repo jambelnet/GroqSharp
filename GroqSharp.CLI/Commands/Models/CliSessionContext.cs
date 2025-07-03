@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Interfaces;
+﻿using GroqSharp.Core.Helpers;
+using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using GroqSharp.Core.Services;
 
@@ -43,6 +44,11 @@ namespace GroqSharp.CLI.Commands.Models
 
             Conversation = new ConversationService(_globalService);
             Conversation.LoadFromSession(session);
+        }
+
+        public Message[] GetSanitizedMessages()
+        {
+            return Conversation.GetApiMessages().SanitizeForApi().ToArray();
         }
 
         public string Prompt(string message, ConsoleColor color = ConsoleColor.Gray)

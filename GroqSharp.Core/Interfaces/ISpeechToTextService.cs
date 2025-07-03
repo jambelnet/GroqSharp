@@ -2,6 +2,6 @@
 {
     public interface ISpeechToTextService
     {
-        Task<string> TranscribeAudioAsync(string filePath);
+        Task<string> TranscribeAudioAsync(string filePath, string? model = null);
     }
 }

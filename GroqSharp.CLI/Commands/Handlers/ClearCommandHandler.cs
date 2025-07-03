@@ -11,7 +11,11 @@ namespace GroqSharp.CLI.Commands.Handlers
                 return false;
 
             context.Conversation.ClearHistory();
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Conversation history cleared.");
+            Console.ResetColor();
+
             return true;
         }
 

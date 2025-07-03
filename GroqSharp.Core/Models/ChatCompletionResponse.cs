@@ -6,8 +6,7 @@
 
         public class Choice
         {
-            public Message Message { get; set; }
-            public string FinishReason { get; set; }
+            public Message? Message { get; set; }
         }
     }
 }

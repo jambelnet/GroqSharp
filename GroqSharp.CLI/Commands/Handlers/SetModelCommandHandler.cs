@@ -23,7 +23,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 var models = await context.GroqService.GetAvailableModelsAsync();
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"\nCurrent Model: {_modelConfig.GetModel()}");
+                Console.WriteLine($"\nCurrent Model: {context.CurrentModel ?? ConversationService.DefaultModel}");
                 Console.ResetColor();
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -36,7 +36,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 Console.ResetColor();
 
                 var input = context.Prompt($"Select model (1-{models.Count}): ");
-                if (int.TryParse(input, out var choice) && choice > 0 && choice <= models.Count)
+                if (int.TryParse(input, out var choice) && choice >= 1 && choice <= models.Count)
                 {
                     var selectedModel = models[choice - 1];
                     context.CurrentModel = selectedModel;
@@ -44,14 +44,14 @@ namespace GroqSharp.CLI.Commands.Handlers
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Model changed to '{selectedModel}'.");
-                    Console.ResetColor();
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Invalid selection. Model not changed.");
-                    Console.ResetColor();
                 }
+
+                Console.ResetColor();
             }
             catch (Exception ex)
             {

@@ -10,8 +10,7 @@ namespace GroqSharp.Core.Models
         [JsonPropertyName("content")]
         public object Content { get; set; }
 
-        // Remove the Timestamp property for API requests
-        [JsonIgnore]
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        [JsonPropertyName("executed_tools")]
+        public List<ExecutedTool>? ExecutedTools { get; set; }
     }
 }

@@ -5,28 +5,29 @@ using GroqSharp.Core.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace GroqSharp.Core.Services
 {
     public class TextToSpeechService : ITextToSpeechService
     {
+        private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
         private readonly GroqConfiguration _settings;
         private readonly string _apiKey;
 
-        public TextToSpeechService(HttpClient httpClient, IGroqConfigurationService config)
+        public TextToSpeechService(HttpClient httpClient, IGroqConfigurationService config, IModelResolver modelResolver)
         {
             _httpClient = httpClient;
-            _apiKey = config.GetConfiguration().ApiKey;
             _settings = config.GetConfiguration();
+            _apiKey = _settings.ApiKey;
+            _modelResolver = modelResolver;
         }
 
         public async Task<byte[]> SynthesizeSpeechAsync(string text, string voice = "Arista-PlayAI")
         {
             var payload = new
             {
-                model = _settings.DefaultTTSModel ?? "playai-tts",
+                model = _modelResolver.GetModelFor("/speak"),
                 input = text,
                 voice,
                 response_format = "wav"

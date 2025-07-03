@@ -10,11 +10,12 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/new", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            if (context.Conversation.GetHistory().Any())
+            if (context.Conversation.GetFullHistory().Any())
             {
                 await context.SaveConversation();
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("Previous chat saved.");
+                Console.ResetColor();
             }
 
             var title = args.Length > 0 ? string.Join(" ", args) : null;

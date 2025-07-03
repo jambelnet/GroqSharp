@@ -1,17 +1,18 @@
-﻿// Text-to-Speech Command
+﻿using GroqSharp.Core.Interfaces;
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
-using GroqSharp.Core.Interfaces;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
     public class SpeakCommandHandler : ICommandProcessor
     {
-        private readonly ITextToSpeechService _tts;
+        private readonly ITextToSpeechService _ttsService;
+        private readonly IModelResolver _modelResolver;
 
-        public SpeakCommandHandler(ITextToSpeechService tts)
+        public SpeakCommandHandler(ITextToSpeechService ttsService, IModelResolver modelResolver)
         {
-            _tts = tts;
+            _ttsService = ttsService;
+            _modelResolver = modelResolver;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
@@ -25,7 +26,8 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                var audio = await _tts.SynthesizeSpeechAsync(text);
+                var model = _modelResolver.GetModelFor(command);
+                var audio = await _ttsService.SynthesizeSpeechAsync(text);
                 var fileName = Path.Combine(Path.GetTempPath(), "groq_tts.wav");
                 await File.WriteAllBytesAsync(fileName, audio);
 

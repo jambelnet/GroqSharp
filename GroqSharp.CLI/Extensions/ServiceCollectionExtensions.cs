@@ -18,6 +18,7 @@ namespace GroqSharp.CLI.Extensions
             services.AddSingleton<ModelConfigurationService>();
 
             // Command handlers (alphabetical order for easy maintenance)
+            services.AddTransient<ICommandProcessor, AgenticCommandHandler>();
             services.AddTransient<ICommandProcessor, ArchiveCommandHandler>();
             services.AddTransient<ICommandProcessor, ClearCommandHandler>();
             services.AddTransient<ICommandProcessor, ExitCommandHandler>();

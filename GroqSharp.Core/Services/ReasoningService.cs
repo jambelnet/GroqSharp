@@ -10,22 +10,26 @@ namespace GroqSharp.Core.Services
 {
     public class ReasoningService : IReasoningService
     {
+        private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
         private readonly GroqConfiguration _settings;
         private readonly string _apiKey;
 
-        public ReasoningService(HttpClient httpClient, IGroqConfigurationService config)
+        public ReasoningService(HttpClient httpClient, IGroqConfigurationService config, IModelResolver modelResolver)
         {
             _httpClient = httpClient;
             _settings = config.GetConfiguration();
             _apiKey = _settings.ApiKey;
+            _modelResolver = modelResolver;
         }
 
-        public async Task<string> AnalyzeAsync(string prompt, string model = "deepseek-r1-distill-llama-70b", string reasoningFormat = "raw", string reasoningEffort = "default")
+        public async Task<string> AnalyzeAsync(string prompt, string? model = null, string reasoningFormat = "raw", string reasoningEffort = "default")
         {
+            var usedModel = model ?? _modelResolver.GetModelFor("/reason");
+
             var requestPayload = new
             {
-                model,
+                model = usedModel,
                 messages = new[]
                 {
                     new { role = "user", content = prompt }
@@ -35,7 +39,7 @@ namespace GroqSharp.Core.Services
                 top_p = 0.95,
                 stream = false,
                 reasoning_format = reasoningFormat,
-                reasoning_effort = model.Contains("qwen") ? reasoningEffort : null
+                reasoning_effort = usedModel.Contains("qwen") ? reasoningEffort : null
             };
 
             var json = JsonSerializer.Serialize(requestPayload, JsonDefaults.InWhenWritingNulldented);

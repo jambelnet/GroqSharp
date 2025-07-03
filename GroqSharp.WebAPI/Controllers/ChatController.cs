@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Interfaces;
+﻿using GroqSharp.Core.Helpers;
+using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using GroqSharp.WebAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ namespace GroqSharp.WebAPI.Controllers
             var response = await _groqService.GetChatCompletionAsync(new ChatRequest
             {
                 Model = sessionContext.Conversation.CurrentModel,
-                Messages = sessionContext.Conversation.GetApiMessages(),
+                Messages = sessionContext.Conversation.GetApiMessages().SanitizeForApi().ToArray(),
                 Temperature = double.TryParse(_config["Groq:DefaultTemperature"], out var temp) ? temp : 0.7
             });
 

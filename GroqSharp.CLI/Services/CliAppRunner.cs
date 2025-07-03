@@ -1,6 +1,7 @@
 ﻿using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
+using GroqSharp.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -67,8 +68,8 @@ namespace GroqSharp.CLI.Services
 
                 var request = new ChatRequest
                 {
-                    Model = context.CurrentModel ?? Core.Services.ConversationService.DefaultModel,
-                    Messages = context.Conversation.GetApiMessages(),
+                    Model = context.CurrentModel ?? ConversationService.DefaultModel,
+                    Messages = context.GetSanitizedMessages(),
                     Temperature = 0.7
                 };
 

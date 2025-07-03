@@ -1,17 +1,19 @@
-﻿// Speech-to-Text Command
+﻿using GroqSharp.Core.Interfaces;
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
-using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Helpers;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
     public class TranscribeCommandHandler : ICommandProcessor
     {
-        private readonly ISpeechToTextService _speechService;
+        private readonly ISpeechToTextService _speechToTextService;
+        private readonly IModelResolver _modelResolver;
 
-        public TranscribeCommandHandler(ISpeechToTextService speechService)
+        public TranscribeCommandHandler(ISpeechToTextService speechToTextService, IModelResolver modelResolver)
         {
-            _speechService = speechService;
+            _speechToTextService = speechToTextService;
+            _modelResolver = modelResolver;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
@@ -23,10 +25,16 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                var result = await _speechService.TranscribeAudioAsync(filePath);
+                var model = _modelResolver.GetModelFor(command);
+                var content = await _speechToTextService.TranscribeAudioAsync(filePath, model);
+
+                var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
+
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nTranscription Result:\n" + result);
+                Console.WriteLine("\nTranscription Result:\n" + extractedContent);
                 Console.ResetColor();
+
+                context.PreviousCommandResult = extractedContent;
             }
             catch (Exception ex)
             {
