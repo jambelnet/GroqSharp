@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Services;
 
 namespace GroqSharp.CLI.Commands.Handlers
@@ -22,18 +23,16 @@ namespace GroqSharp.CLI.Commands.Handlers
             {
                 var models = await context.GroqService.GetAvailableModelsAsync();
 
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"\nCurrent Model: {context.CurrentModel ?? ConversationService.DefaultModel}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo(
+                    $"\nCurrent Model: {context.CurrentModel ?? Core.Services.ConversationService.DefaultModel}");
 
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("\nAvailable Models:");
+                ConsoleOutputHelper.WriteInfo("\nAvailable Models:");
                 for (int i = 0; i < models.Count; i++)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                     Console.WriteLine($"{i + 1}. {models[i]}");
+                    Console.ResetColor();
                 }
-                Console.ResetColor();
 
                 var input = context.Prompt($"Select model (1-{models.Count}): ");
                 if (int.TryParse(input, out var choice) && choice >= 1 && choice <= models.Count)
@@ -42,22 +41,16 @@ namespace GroqSharp.CLI.Commands.Handlers
                     context.CurrentModel = selectedModel;
                     _modelConfig.SetModel(selectedModel);
 
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Model changed to '{selectedModel}'.");
+                    ConsoleOutputHelper.WriteInfo($"Model changed to '{selectedModel}'.");
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid selection. Model not changed.");
+                    ConsoleOutputHelper.WriteError("Invalid selection. Model not changed.");
                 }
-
-                Console.ResetColor();
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Error setting model: {ex.Message}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError($"Error setting model: {ex.Message}");
             }
 
             return true;

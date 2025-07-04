@@ -1,6 +1,7 @@
 ﻿using GroqSharp.Core.Interfaces;
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -28,18 +29,15 @@ namespace GroqSharp.CLI.Commands.Handlers
             {
                 var model = _modelResolver.GetModelFor(command);
                 var audio = await _ttsService.SynthesizeSpeechAsync(text);
-                var fileName = Path.Combine(Path.GetTempPath(), "groq_tts.wav");
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var fileName = Path.Combine(Path.GetTempPath(), $"groq_tts_{timestamp}.wav");
                 await File.WriteAllBytesAsync(fileName, audio);
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Saved audio to {fileName}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo($"Saved audio to {fileName}");
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + ex.Message);
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError("Text-to-speech failed: " + ex.Message);
             }
 
             return true;

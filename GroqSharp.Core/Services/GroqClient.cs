@@ -1,6 +1,5 @@
 ﻿using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
-using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using System.Net.Http.Headers;
@@ -86,7 +85,7 @@ namespace GroqSharp.Core.Services
             try
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, ModelsEndpoint);
-                if (_apiKey != "temp")
+                if (!string.IsNullOrWhiteSpace(_apiKey) && _apiKey != "temp")
                 {
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
                 }
@@ -137,9 +136,7 @@ namespace GroqSharp.Core.Services
             }
 
             var responseContent = await response.Content.ReadFromJsonAsync<ChatResponse>();
-            string responseString = ContentHelpers.AsString(responseContent?.Choices?[0]?.Message?.Content);
-
-            return responseString ?? "No response content";
+            return responseContent?.Choices?[0]?.Message?.Content ?? "No response content";
         }
 
         private async IAsyncEnumerable<string> ProcessStreamingRequestAsync(ChatRequest request)
@@ -158,11 +155,10 @@ namespace GroqSharp.Core.Services
 
                 var chunk = DeserializeResponseChunk(eventData);
                 var content = chunk?.Choices?[0]?.Delta?.Content ?? chunk?.Choices?[0]?.Message?.Content;
-                string contentText = ContentHelpers.AsString(content);
 
-                if (!string.IsNullOrEmpty(contentText))
+                if (!string.IsNullOrEmpty(content))
                 {
-                    yield return contentText;
+                    yield return content;
                 }
             }
         }

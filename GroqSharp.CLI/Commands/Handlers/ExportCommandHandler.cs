@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
@@ -29,17 +30,17 @@ namespace GroqSharp.CLI.Commands.Handlers
                 {
                     var innerCommand = args[0];
                     var innerArgs = args.Skip(1)
-                        .TakeWhile(arg => !IsExportFilename(arg))
-                        .ToArray();
+                                        .TakeWhile(arg => !IsExportFilename(arg))
+                                        .ToArray();
 
                     outputPath = args.LastOrDefault(IsExportFilename)
-                        ?? context.Prompt("Enter output path: ");
+                              ?? context.Prompt("Enter output path: ");
 
                     var input = string.Join(' ', new[] { innerCommand }.Concat(innerArgs));
                     var success = await _executor.ExecuteCommand(input, context);
 
                     if (!success || context.PreviousCommandResult is not string resultText)
-                        throw new InvalidOperationException("Command did not return a string result.");
+                        return ConsoleOutputHelper.ShowError("Command did not return a string result.");
 
                     content = resultText;
                 }
@@ -48,25 +49,22 @@ namespace GroqSharp.CLI.Commands.Handlers
                     content = args.Length > 0
                         ? string.Join(" ", args)
                         : context.PreviousCommandResult as string
-                        ?? context.Prompt("Enter AI output to export: ");
+                          ?? context.Prompt("Enter AI output to export: ");
 
                     outputPath = context.Prompt("Enter output path (default: output.txt): ");
+                    if (string.IsNullOrWhiteSpace(outputPath))
+                        outputPath = "output.txt";
                 }
 
                 FileProcessor.ExportToFile(content, outputPath);
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Exported to: {outputPath}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo($"Exported to: {outputPath}");
 
                 if (!isCommand)
                     context.PreviousCommandResult = null;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Export failed: {ex.Message}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError($"Export failed: {ex.Message}");
             }
 
             return true;
@@ -74,12 +72,10 @@ namespace GroqSharp.CLI.Commands.Handlers
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/export" };
 
-        private static bool IsExportFilename(string arg)
-        {
-            return arg.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
-                || arg.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
-                || arg.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
-                || arg.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
-        }
+        private static bool IsExportFilename(string arg) =>
+            arg.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+         || arg.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+         || arg.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+         || arg.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
     }
 }

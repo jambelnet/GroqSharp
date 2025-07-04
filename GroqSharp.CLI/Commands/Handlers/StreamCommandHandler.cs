@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Models;
 using GroqSharp.Core.Services;
 using System.Text;
@@ -13,14 +14,11 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/stream", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Streaming session started. Type your message. Type '/end' to stop.");
-            Console.ResetColor();
+            ConsoleOutputHelper.WriteInfo("Streaming session started. Type your message. Type '/end' to stop.");
 
             while (true)
             {
                 var input = context.Prompt("\nYou: ", ConsoleColor.Cyan);
-
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
 
@@ -29,10 +27,8 @@ namespace GroqSharp.CLI.Commands.Handlers
 
                 try
                 {
-                    // Add user message to conversation history
                     context.Conversation.AddMessage(new Message { Role = "user", Content = input });
 
-                    // Use the CurrentModel from context or fallback to default since ConversationService does not have GetModelFor method
                     var model = context.CurrentModel ?? ConversationService.DefaultModel;
 
                     var request = new ChatRequest
@@ -65,14 +61,12 @@ namespace GroqSharp.CLI.Commands.Handlers
 
                     Console.WriteLine();
 
-                    // Add assistant response to conversation history
                     var assistantResponse = assistantResponseBuilder.ToString();
                     context.Conversation.AddMessage(new Message { Role = "assistant", Content = assistantResponse });
                 }
                 catch (Exception ex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Streaming failed: " + ex.Message);
+                    ConsoleOutputHelper.WriteError("Streaming failed: " + ex.Message);
                 }
                 finally
                 {

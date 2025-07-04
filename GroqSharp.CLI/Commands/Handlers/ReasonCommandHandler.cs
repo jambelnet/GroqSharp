@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
@@ -22,30 +23,27 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/reason", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var prompt = args.Length > 0 ? string.Join(" ", args) : context.Prompt("Enter reasoning prompt: ");
+            var prompt = args.Length > 0
+                ? string.Join(" ", args)
+                : context.Prompt("Enter reasoning prompt: ");
 
             context.Conversation.AddMessage(new Message { Role = "user", Content = prompt });
 
             try
             {
                 var model = _modelResolver.GetModelFor(command);
-                var content = await _reasoningService.AnalyzeAsync(prompt, model);
+                var response = await _reasoningService.AnalyzeAsync(prompt, model);
 
-                var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
+                var extractedContent = OutputFormatter.ExtractChatCompletionContent(response);
 
                 context.Conversation.AddMessage(new Message { Role = "assistant", Content = extractedContent });
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nReasoning Output:\n" + extractedContent);
-                Console.ResetColor();
-
                 context.PreviousCommandResult = extractedContent;
+
+                ConsoleOutputHelper.DisplayResponse(extractedContent);
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Reasoning failed: " + ex.Message);
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError("Reasoning failed: " + ex.Message);
             }
 
             return true;

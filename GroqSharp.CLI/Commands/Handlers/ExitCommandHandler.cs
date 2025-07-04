@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -10,6 +11,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/exit", StringComparison.OrdinalIgnoreCase))
                 return Task.FromResult(false);
 
+            ConsoleOutputHelper.WriteInfo("Exiting GroqSharp. Goodbye!");
             context.ShouldExit = true;
             return Task.FromResult(true);
         }

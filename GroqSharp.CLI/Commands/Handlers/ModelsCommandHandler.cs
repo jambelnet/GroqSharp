@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -12,15 +13,14 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine("Fetching available models...");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo("Fetching available models...");
 
                 var models = await context.GroqService.GetAvailableModelsAsync();
                 var defaultModel = await context.GroqService.GetDefaultModelAsync();
 
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("\nAvailable Models:");
+
                 foreach (var model in models)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -33,9 +33,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Error fetching models: {ex.Message}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError($"Error fetching models: {ex.Message}");
             }
 
             return true;

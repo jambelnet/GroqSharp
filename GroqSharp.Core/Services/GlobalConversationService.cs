@@ -215,8 +215,7 @@ namespace GroqSharp.Core.Services
 
         private string GetTitleFromMessages(List<Message> messages)
         {
-            string preview = ContentHelpers.GetPreview(messages.FirstOrDefault()?.Content);
-            return preview ?? "Untitled Conversation";
+            return messages.FirstOrDefault()?.Content ?? "Untitled Conversation";
         }
 
         private string GetSessionFilePath(string sessionId)

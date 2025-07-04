@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -13,18 +14,13 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (context.Conversation.GetFullHistory().Any())
             {
                 await context.SaveConversation();
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Previous chat saved.");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo("Previous chat saved.");
             }
 
             var title = args.Length > 0 ? string.Join(" ", args) : null;
             await context.InitializeAsync(Guid.NewGuid().ToString(), title);
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Started new chat session: {context.Title}");
-            Console.ResetColor();
-
+            ConsoleOutputHelper.WriteInfo($"Started new chat session: {context.Title}");
             return true;
         }
 

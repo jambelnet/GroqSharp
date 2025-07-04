@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
@@ -13,19 +14,17 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                var filePath = args.Length > 0 ? args[0] : context.Prompt("Enter file path to process: ");
+                var filePath = args.Length > 0
+                    ? args[0]
+                    : context.Prompt("Enter file path to process: ");
 
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"\nSupported formats: {string.Join(", ", FileProcessor.SupportedInputFormats)}");
-                Console.WriteLine($"Max file size: {FileProcessor.MaxFileSize / (1024 * 1024)}MB");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteInfo(
+                    $"\nSupported formats: {string.Join(", ", FileProcessor.SupportedInputFormats)}\n" +
+                    $"Max file size: {FileProcessor.MaxFileSize / (1024 * 1024)}MB");
 
                 var textContent = FileProcessor.ExtractTextFromFile(filePath);
 
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"\nFile content ({Path.GetFileName(filePath)}):");
-                Console.ResetColor();
-
+                ConsoleOutputHelper.WriteInfo($"\nFile content ({Path.GetFileName(filePath)}):");
                 Console.WriteLine(textContent.Length > 500
                     ? textContent.Substring(0, 500) + "..."
                     : textContent);
@@ -41,9 +40,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 
                 context.PreviousCommandResult = response;
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nAI Response:\n{response}");
-                Console.ResetColor();
+                ConsoleOutputHelper.DisplayResponse(response);
 
                 if (context.PromptYesNo("\nExport this response"))
                 {
@@ -51,9 +48,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                     if (!string.IsNullOrWhiteSpace(outputPath))
                     {
                         FileProcessor.ExportToFile(response, outputPath);
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"Exported to {outputPath}");
-                        Console.ResetColor();
+                        ConsoleOutputHelper.WriteInfo($"Exported to {outputPath}");
                     }
                 }
 
@@ -62,9 +57,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             catch (Exception ex)
             {
                 context.PreviousCommandResult = null;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError($"Error: {ex.Message}");
             }
 
             return true;

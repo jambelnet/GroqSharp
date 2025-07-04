@@ -2,6 +2,7 @@
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Helpers;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -21,26 +22,21 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/translate", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var filePath = args.FirstOrDefault() ?? context.Prompt("Enter audio file path to translate: ");
+            var filePath = args.FirstOrDefault()
+                ?? context.Prompt("Enter audio file path to translate: ");
 
             try
             {
                 var model = _modelResolver.GetModelFor(command);
                 var content = await _translationService.TranslateAudioAsync(filePath, model);
-
                 var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nTranslation Result:\n" + extractedContent);
-                Console.ResetColor();
-
+                ConsoleOutputHelper.WriteInfo("\nTranslation Result:\n" + extractedContent);
                 context.PreviousCommandResult = extractedContent;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Translation failed: {ex.Message}");
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError("Translation failed: " + ex.Message);
             }
 
             return true;

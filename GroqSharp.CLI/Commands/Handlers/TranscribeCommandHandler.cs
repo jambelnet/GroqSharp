@@ -2,6 +2,7 @@
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Helpers;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -21,26 +22,22 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/transcribe", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var filePath = args.Length > 0 ? args[0] : context.Prompt("Enter audio file path: ");
+            var filePath = args.Length > 0
+                ? args[0]
+                : context.Prompt("Enter audio file path: ");
 
             try
             {
                 var model = _modelResolver.GetModelFor(command);
                 var content = await _speechToTextService.TranscribeAudioAsync(filePath, model);
-
                 var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nTranscription Result:\n" + extractedContent);
-                Console.ResetColor();
-
+                ConsoleOutputHelper.WriteInfo("\nTranscription Result:\n" + extractedContent);
                 context.PreviousCommandResult = extractedContent;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + ex.Message);
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError("Transcription failed: " + ex.Message);
             }
 
             return true;

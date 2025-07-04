@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -11,10 +12,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 return false;
 
             context.Conversation.ClearHistory();
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Conversation history cleared.");
-            Console.ResetColor();
+            ConsoleOutputHelper.WriteInfo("Conversation history cleared.");
 
             return true;
         }

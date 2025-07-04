@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
@@ -27,6 +28,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 bool summaryOnly = args.Contains("--summary");
                 bool verbose = args.Contains("--verbose");
 
+                // Extract query
                 string query = string.Join(" ", args.Where(x => !x.StartsWith("--")));
                 if (string.IsNullOrWhiteSpace(query))
                     query = context.Prompt("Enter agentic query: ");
@@ -34,44 +36,20 @@ namespace GroqSharp.CLI.Commands.Handlers
                 if (string.IsNullOrWhiteSpace(query))
                     throw new ArgumentException("Prompt cannot be null or empty.", nameof(query));
 
-                // Parse SearchSettings from args
-                var searchSettings = new SearchSettings();
-
-                string? excludeDomainsArg = args.FirstOrDefault(a => a.StartsWith("--exclude="));
-                string? includeDomainsArg = args.FirstOrDefault(a => a.StartsWith("--include="));
-                string? countryArg = args.FirstOrDefault(a => a.StartsWith("--country="));
-
-                if (excludeDomainsArg != null)
+                // Parse search filters
+                var searchSettings = new SearchSettings
                 {
-                    searchSettings.ExcludeDomains = excludeDomainsArg.Substring("--exclude=".Length)
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                }
+                    ExcludeDomains = ExtractArgList(args, "--exclude="),
+                    IncludeDomains = ExtractArgList(args, "--include="),
+                    Country = ExtractArg(args, "--country=")
+                };
 
-                if (includeDomainsArg != null)
-                {
-                    searchSettings.IncludeDomains = includeDomainsArg.Substring("--include=".Length)
-                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                }
-
-                if (countryArg != null)
-                {
-                    searchSettings.Country = countryArg.Substring("--country=".Length).Trim();
-                }
-
-                // Add user message
-                context.Conversation.AddMessage(new Message
-                {
-                    Role = "user",
-                    Content = query
-                });
-
-                // Prepare messages for API call, removing executed tools to avoid API errors
-                var messages = context.GetSanitizedMessages();
+                context.Conversation.AddMessage("user", query);
 
                 var request = new ChatRequest
                 {
                     Model = _modelResolver.GetModelFor("/agent"),
-                    Messages = messages,
+                    Messages = context.GetSanitizedMessages(),
                     SearchSettings = searchSettings
                 };
 
@@ -79,62 +57,29 @@ namespace GroqSharp.CLI.Commands.Handlers
                 var message = response?.Choices?.FirstOrDefault()?.Message;
 
                 if (message == null)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("No response from Groq.");
-                    Console.ResetColor();
-                    return true;
-                }
+                    return ConsoleOutputHelper.ShowError("No response from Groq.");
 
-                // Patch executed tools before saving to history
-                message.PatchExecutedTools(defaultInput: query);
-
-                // Add full message including executed tools to conversation history (do NOT sanitize here)
+                message.PatchExecutedTools(query);
                 context.Conversation.AddMessage(message);
-                context.PreviousCommandResult = message.Content?.ToString();
+                context.PreviousCommandResult = message.Content;
 
-                // Show user-friendly response (hide executed tools from default output)
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\n--- Response ---");
-                Console.ResetColor();
-                Console.WriteLine(message.Content?.ToString());
-
-                // If verbose or summary flag, print executed tools info separately
-                if (message.ExecutedTools?.Count > 0 && (verbose || summaryOnly))
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("\n--- Executed Tools ---");
-                    Console.ResetColor();
-
-                    var tools = message.ExecutedTools;
-                    if (summaryOnly)
-                    {
-                        var top = tools.First();
-                        Console.WriteLine($"Tool: {top.ToolName}");
-                        Console.WriteLine($"Output: {top.Output}");
-                    }
-                    else
-                    {
-                        foreach (var tool in tools)
-                        {
-                            Console.WriteLine($"Tool: {tool.ToolName}");
-                            Console.WriteLine($"Input: {tool.Input}");
-                            Console.WriteLine($"Output: {tool.Output}\n");
-                        }
-                    }
-                }
+                ConsoleOutputHelper.DisplayResponse(message.Content);
+                ConsoleOutputHelper.DisplayExecutedTools(message.ExecutedTools, summaryOnly, verbose);
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Agentic call failed: " + ex.Message);
-                Console.ResetColor();
-                return true;
+                return ConsoleOutputHelper.ShowError("Agentic call failed: " + ex.Message);
             }
         }
 
         public IEnumerable<string> GetAvailableCommands() => new[] { "/agent" };
+
+        private static string? ExtractArg(string[] args, string prefix) =>
+            args.FirstOrDefault(a => a.StartsWith(prefix))?.Substring(prefix.Length).Trim();
+
+        private static string[]? ExtractArgList(string[] args, string prefix) =>
+            ExtractArg(args, prefix)?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 }

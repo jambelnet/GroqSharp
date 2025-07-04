@@ -8,7 +8,7 @@ namespace GroqSharp.Core.Models
         public string Role { get; set; } = "user";
 
         [JsonPropertyName("content")]
-        public object Content { get; set; }
+        public string? Content { get; set; }
 
         [JsonPropertyName("executed_tools")]
         public List<ExecutedTool>? ExecutedTools { get; set; }

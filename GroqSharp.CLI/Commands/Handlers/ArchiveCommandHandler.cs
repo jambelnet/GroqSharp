@@ -1,5 +1,7 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 
@@ -47,9 +49,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                     break;
 
                 default:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Unknown subcommand. Use: list, load, delete, rename.");
-                    Console.ResetColor();
+                    ConsoleOutputHelper.WriteError("Unknown subcommand. Use: list, load, delete, rename.");
                     break;
             }
 
@@ -60,20 +60,20 @@ namespace GroqSharp.CLI.Commands.Handlers
 
         private void PrintUsage()
         {
-            Console.WriteLine("Usage: /archive list|load [id]|delete [id]|rename [id] [new name]");
+            ConsoleOutputHelper.WriteInfo("Usage: /archive list|load [id]|delete [id]|rename [id] [new name]");
         }
 
         private void PrintArchiveList(List<ConversationMeta> archives)
         {
             if (archives.Count == 0)
             {
-                Console.WriteLine("No saved conversations found.");
+                ConsoleOutputHelper.WriteInfo("No saved conversations found.");
                 return;
             }
 
             for (int i = 0; i < archives.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. [{archives[i].SessionId}] {archives[i].Title}");
+                ConsoleOutputHelper.WriteHighlight($"{i + 1}. [{archives[i].SessionId}] {archives[i].Title}");
                 Console.WriteLine($"   Last Modified: {archives[i].LastModified}");
                 Console.WriteLine($"   Preview: {archives[i].Preview}");
             }
@@ -83,43 +83,42 @@ namespace GroqSharp.CLI.Commands.Handlers
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Specify archive ID to load.");
+                ConsoleOutputHelper.WriteError("Specify archive ID to load.");
                 return;
             }
 
             var session = await _conversationService.GetOrCreateSessionAsync(args[1]);
             await context.InitializeAsync(args[1], session.Title);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Loaded conversation: {session.Title}");
-            Console.ResetColor();
+
+            ConsoleOutputHelper.WriteInfo($"Loaded conversation: {session.Title}");
         }
 
         private async Task HandleDelete(string[] args)
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Specify archive ID to delete.");
+                ConsoleOutputHelper.WriteError("Specify archive ID to delete.");
                 return;
             }
 
             if (await _conversationService.DeleteConversationAsync(args[1]))
-                Console.WriteLine("Conversation deleted.");
+                ConsoleOutputHelper.WriteInfo("Conversation deleted.");
             else
-                Console.WriteLine("Conversation not found.");
+                ConsoleOutputHelper.WriteError("Conversation not found.");
         }
 
         private async Task HandleRename(string[] args)
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: /archive rename [id] [new name]");
+                ConsoleOutputHelper.WriteError("Usage: /archive rename [id] [new name]");
                 return;
             }
 
             if (await _conversationService.RenameConversationAsync(args[1], args[2]))
-                Console.WriteLine("Conversation renamed.");
+                ConsoleOutputHelper.WriteInfo("Conversation renamed.");
             else
-                Console.WriteLine("Conversation not found or rename failed.");
+                ConsoleOutputHelper.WriteError("Conversation not found or rename failed.");
         }
     }
 }

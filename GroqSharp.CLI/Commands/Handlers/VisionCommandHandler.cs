@@ -3,6 +3,7 @@ using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -22,8 +23,12 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/vision", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var imagePath = args.Length > 0 ? args[0] : context.Prompt("Enter image path or URL: ");
-            var prompt = args.Length > 1 ? string.Join(" ", args.Skip(1)) : context.Prompt("Enter prompt for image: ");
+            var imagePath = args.FirstOrDefault()
+                ?? context.Prompt("Enter image path or URL: ");
+
+            var prompt = args.Skip(1).Any()
+                ? string.Join(" ", args.Skip(1))
+                : context.Prompt("Enter prompt for image: ");
 
             context.Conversation.AddMessage(new Message
             {
@@ -34,23 +39,17 @@ namespace GroqSharp.CLI.Commands.Handlers
             try
             {
                 var model = _modelResolver.GetModelFor(command);
-                var content = await _visionService.AnalyzeImageAsync(imagePath, prompt, model);
+                var response = await _visionService.AnalyzeImageAsync(imagePath, prompt, model);
+                var extracted = OutputFormatter.ExtractChatCompletionContent(response);
 
-                var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
+                context.Conversation.AddMessage(new Message { Role = "assistant", Content = extracted });
+                context.PreviousCommandResult = extracted;
 
-                context.Conversation.AddMessage(new Message { Role = "assistant", Content = extractedContent });
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\nVision Response:\n" + extractedContent);
-                Console.ResetColor();
-
-                context.PreviousCommandResult = extractedContent;
+                ConsoleOutputHelper.WriteInfo("\nVision Response:\n" + extracted);
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + ex.Message);
-                Console.ResetColor();
+                ConsoleOutputHelper.WriteError("Vision analysis failed: " + ex.Message);
             }
 
             return true;

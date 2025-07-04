@@ -1,5 +1,6 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
+using GroqSharp.CLI.Utilities;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -10,8 +11,7 @@ namespace GroqSharp.CLI.Commands.Handlers
             if (!command.Equals("/help", StringComparison.OrdinalIgnoreCase))
                 return Task.FromResult(false);
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("\nAvailable commands:\n");
+            ConsoleOutputHelper.WriteInfo("\nAvailable commands:\n");
 
             PrintSection("Session Management", new[]
             {
@@ -46,7 +46,6 @@ namespace GroqSharp.CLI.Commands.Handlers
                 ("/exit",       "Quit the application")
             });
 
-            Console.ResetColor();
             return Task.FromResult(true);
         }
 
