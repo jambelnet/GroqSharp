@@ -71,11 +71,12 @@ Sample `appsettings.json`:
     "ApiKey": "your_api_key",
     "BaseUrl": "https://api.groq.com/openai/v1/",
     "DefaultModel": "llama-3.3-70b-versatile",
-    "DefaultTemperature": 0.7,
-    "DefaultMaxTokens": 1024,
+    "DefaultAgenticModel": "compound-beta",
     "DefaultVisionModel": "meta-llama/llama-4-scout-17b-16e-instruct",
     "DefaultTTSModel": "playai-tts",
     "DefaultWhisperModel": "whisper-large-v3-turbo",
+    "DefaultTemperature": 0.7,
+    "DefaultMaxTokens": 1024,
     "WhisperLanguage": "en"
   }
 }
@@ -134,13 +135,14 @@ Sample `appsettings.json`:
 
 GroqSharp supports multimodal AI use cases:
 
-| Feature            | Description                                                                      |
-|--------------------|----------------------------------------------------------------------------------|
-| **Vision**         | Analyze images using `meta-llama/llama-4-scout-17b-16e-instruct` via file or URL |
-| **Text-to-Speech** | Uses `playai-tts` for converting text to WAV audio with configurable voices      |
-| **Speech-to-Text** | Uses `whisper-large-v3-turbo` for accurate, multilingual transcriptions          |
-| **Translation**    | Uses `whisper-large-v3` to translate non-English audio to English                |
-| **Reasoning**      | Uses `deepseek-r1-distill-llama-70b` or `qwen3-32b` for structured thinking      |
+| Feature             | Description                                                                                          |
+|---------------------|------------------------------------------------------------------------------------------------------|
+| **Vision**          | Analyze images using `meta-llama/llama-4-scout-17b-16e-instruct` via file or URL                     |
+| **Text-to-Speech**  | Uses `playai-tts` for converting text to WAV audio with configurable voices                          |
+| **Speech-to-Text**  | Uses `whisper-large-v3-turbo` for accurate, multilingual transcriptions                              |
+| **Translation**     | Uses `whisper-large-v3-turbo` to translate non-English audio to English                                    |
+| **Reasoning**       | Uses `deepseek-r1-distill-llama-70b` or `qwen3-32b` for structured thinking                          |
+| **Agentic Tooling** | Structured tool invocation using `compound-beta` with support for filters and tool result inspection |
 
 ### Multimodal Usage Examples
 
@@ -254,6 +256,7 @@ You can export AI responses or the results of other CLI commands.
 /export "This is a sample summary" C:\output\summary.txt
 /export /vision https://example.com/image.jpg "What do you see?" C:\output\vision.txt
 /export /speak "Hello world!" C:\output\speech.wav
+/export /agent What's the population of Japan? C:\output\agent.txt
 ```
 
 If no output file path is provided, the CLI will prompt for one.
