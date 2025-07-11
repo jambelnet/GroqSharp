@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Helpers;
+﻿using GroqSharp.Core.Enums;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using System.Collections.Concurrent;
@@ -8,11 +9,14 @@ namespace GroqSharp.Core.Services
 {
     public class GlobalConversationService : IGlobalConversationService
     {
-        private readonly string _storagePath;
+        private readonly IModelResolver _modelResolver;
         private readonly ConcurrentDictionary<string, ConversationSession> _activeSessions = new();
+        private readonly string _storagePath;
 
-        public GlobalConversationService()
+        public GlobalConversationService(IModelResolver modelResolver)
         {
+            _modelResolver = modelResolver;
+
             _storagePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "GroqSharp",
@@ -176,7 +180,7 @@ namespace GroqSharp.Core.Services
 
                 // hydrate flat fields
                 session.Messages = data.Messages ?? new List<Message>();
-                session.Model = ConversationService.DefaultModel;
+                session.Model = _modelResolver.GetModelFor(GroqFeature.Default);
                 session.Title = data.Title;
                 session.LastModified = data.LastModified;
             }

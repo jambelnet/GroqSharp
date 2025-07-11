@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Interfaces;
+﻿using GroqSharp.Core.Enums;
+using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 
 namespace GroqSharp.Core.Services
@@ -8,25 +9,29 @@ namespace GroqSharp.Core.Services
     /// </summary>
     public class ConversationService : IAutoSaveConversation
     {
-        private readonly object _lock = new();
-        private readonly int _maxHistoryLength;
         private readonly IGlobalConversationService _globalConversationService;
+        private readonly IModelResolver _modelResolver;
         private readonly List<Message> _messages = new();
-
-        private string _sessionId;
-
-        public const string DefaultModel = "llama-3.3-70b-versatile";
+        private readonly object _lock = new();
+        private readonly int _maxHistoryLength;      
+        private string? _sessionId;
 
         /// <summary>Current model in use for the conversation.</summary>
-        public string CurrentModel { get; set; } = DefaultModel;
+        public string CurrentModel { get; set; }
 
         public ConversationService(
             IGlobalConversationService globalConversationService,
+            IModelResolver modelResolver,
             int maxHistoryLength = 100)
         {
             _globalConversationService = globalConversationService
                 ?? throw new ArgumentNullException(nameof(globalConversationService));
+            _modelResolver = modelResolver
+                ?? throw new ArgumentNullException(nameof(modelResolver));
             _maxHistoryLength = maxHistoryLength;
+
+            // Use config-driven model on creation
+            CurrentModel = _modelResolver.GetModelFor(GroqFeature.Default);
         }
 
         /// <summary>
@@ -38,7 +43,7 @@ namespace GroqSharp.Core.Services
                 throw new ArgumentNullException(nameof(session));
 
             _sessionId = session.SessionId;
-            CurrentModel = session.Model ?? DefaultModel;
+            CurrentModel = session.Model ?? _modelResolver.GetModelFor(GroqFeature.Default);
 
             if (session.Messages?.Any() == true)
             {
@@ -67,9 +72,9 @@ namespace GroqSharp.Core.Services
         /// <summary>
         /// Adds a message by role and content.
         /// </summary>
-        public void AddMessage(string role, string content)
+        public void AddMessage(MessageRole role, string content)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(role);
+            ArgumentException.ThrowIfNullOrWhiteSpace(role.ToString());
             AddMessageInternal(new Message { Role = role, Content = content });
         }
 

@@ -1,7 +1,11 @@
-﻿using GroqSharp.Core.Configuration.Interfaces;
+﻿using GroqSharp.Core.Builders;
+using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Constants;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
+using GroqSharp.Core.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -10,6 +14,7 @@ namespace GroqSharp.Core.Services
 {
     public class ReasoningService : IReasoningService
     {
+        private readonly IGroqConfigurationService _configService;
         private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
         private readonly GroqConfiguration _settings;
@@ -18,6 +23,7 @@ namespace GroqSharp.Core.Services
         public ReasoningService(HttpClient httpClient, IGroqConfigurationService config, IModelResolver modelResolver)
         {
             _httpClient = httpClient;
+            _configService = config;
             _settings = config.GetConfiguration();
             _apiKey = _settings.ApiKey;
             _modelResolver = modelResolver;
@@ -25,32 +31,29 @@ namespace GroqSharp.Core.Services
 
         public async Task<string> AnalyzeAsync(string prompt, string? model = null, string reasoningFormat = "raw", string reasoningEffort = "default")
         {
-            var usedModel = model ?? _modelResolver.GetModelFor("/reason");
+            var usedModel = ModelSelector.Resolve(_modelResolver, GroqFeature.Reasoning, model);
+            var defaults = _configService.GetDefaultsFor(GroqFeature.Reasoning);
 
-            var requestPayload = new
-            {
-                model = usedModel,
-                messages = new[]
-                {
-                    new { role = "user", content = prompt }
-                },
-                temperature = 0.6,
-                max_tokens = 1024,
-                top_p = 0.95,
-                stream = false,
-                reasoning_format = reasoningFormat,
-                reasoning_effort = usedModel.Contains("qwen") ? reasoningEffort : null
-            };
+            var request = new ChatRequestBuilder()
+                .WithModel(usedModel)
+                .WithMessages(new[] { new Message { Role = MessageRole.User, Content = prompt } })
+                .WithTemperature(defaults.Temperature)
+                .WithMaxTokens(defaults.MaxTokens)
+                .WithTopP(defaults.TopP)
+                .WithStream(false)
+                .WithReasoningFormat(reasoningFormat)
+                .WithReasoningEffort(usedModel.Contains("qwen") ? reasoningEffort : null)
+                .Build();
 
-            var json = JsonSerializer.Serialize(requestPayload, JsonDefaults.InWhenWritingNulldented);
+            var json = JsonSerializer.Serialize(request, JsonDefaults.InWhenWritingNulldented);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, GroqApiRoutes.ChatCompletions)
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-            var response = await _httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(httpRequest);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();

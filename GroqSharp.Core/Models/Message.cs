@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using GroqSharp.Core.Enums;
+using System.Text.Json.Serialization;
 
 namespace GroqSharp.Core.Models
 {
     public class Message
     {
         [JsonPropertyName("role")]
-        public string Role { get; set; } = "user";
+        public MessageRole Role { get; set; }
 
         [JsonPropertyName("content")]
         public string? Content { get; set; }

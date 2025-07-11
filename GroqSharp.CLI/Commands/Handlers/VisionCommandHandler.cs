@@ -4,6 +4,7 @@ using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Enums;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -32,17 +33,17 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             context.Conversation.AddMessage(new Message
             {
-                Role = "user",
+                Role = MessageRole.User,
                 Content = $"{imagePath} {prompt}".Trim()
             });
 
             try
             {
-                var model = _modelResolver.GetModelFor(command);
+                var model = ModelSelector.Resolve(_modelResolver, GroqFeature.Vision);
                 var response = await _visionService.AnalyzeImageAsync(imagePath, prompt, model);
                 var extracted = OutputFormatter.ExtractChatCompletionContent(response);
 
-                context.Conversation.AddMessage(new Message { Role = "assistant", Content = extracted });
+                context.Conversation.AddMessage(new Message { Role = MessageRole.Assistant, Content = extracted });
                 context.PreviousCommandResult = extracted;
 
                 ConsoleOutputHelper.WriteInfo("\nVision Response:\n" + extracted);

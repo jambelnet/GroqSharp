@@ -1,5 +1,8 @@
-﻿using GroqSharp.Core.Configuration.Interfaces;
+﻿using GroqSharp.Core.Builders;
+using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Constants;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using System.Net.Http.Headers;
@@ -12,18 +15,18 @@ namespace GroqSharp.Core.Services
 {
     public class GroqClient : IGroqClient
     {
+        private readonly IModelResolver _modelResolver;
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey;
         private readonly GroqConfiguration _settings;
-        private readonly ModelConfigurationService _modelConfig;
+        private readonly string _apiKey;
 
-        private const string ChatCompletionsEndpoint = "chat/completions";
+        private const string ChatCompletionsEndpoint = GroqApiRoutes.ChatCompletions;
         private const string ModelsEndpoint = "models";
 
-        public GroqClient(HttpClient httpClient, IGroqConfigurationService configService, ModelConfigurationService modelConfig)
+        public GroqClient(HttpClient httpClient, IGroqConfigurationService configService, IModelResolver modelResolver)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _modelConfig = modelConfig ?? throw new ArgumentNullException(nameof(modelConfig));
+            _modelResolver = modelResolver ?? throw new ArgumentNullException(nameof(modelResolver));
             _settings = configService.GetConfiguration();
             _apiKey = _settings.ApiKey ?? throw new ArgumentException("API Key is required");
         }
@@ -32,7 +35,7 @@ namespace GroqSharp.Core.Services
 
         public async Task<string> CompleteChatAsync(ChatRequest request)
         {
-            request.Stream = false; // Ensure non-streaming
+            request.Stream = false;
             return await ProcessChatRequestAsync(request);
         }
 
@@ -77,7 +80,7 @@ namespace GroqSharp.Core.Services
         {
             var fallbackModels = new List<string>
             {
-                _modelConfig.GetModel(),
+                _modelResolver.GetModelFor(GroqFeature.Default),
                 "llama3-70b-8192",
                 "llama3-8b-8192"
             };
@@ -105,7 +108,7 @@ namespace GroqSharp.Core.Services
 
         public Task<string> GetDefaultModelAsync()
         {
-            return Task.FromResult(_modelConfig.GetModel());
+            return Task.FromResult(_modelResolver.GetModelFor(GroqFeature.Default));
         }
 
         #endregion
@@ -114,15 +117,14 @@ namespace GroqSharp.Core.Services
 
         private ChatRequest CreateBaseChatRequest(string userMessage)
         {
-            var model = _modelConfig.GetModel();
+            var model = _modelResolver.GetModelFor(GroqFeature.Default);
 
-            return new ChatRequest
-            {
-                Model = model,
-                Messages = new[] { new Message { Role = "user", Content = userMessage } },
-                Temperature = _settings.DefaultTemperature,
-                MaxTokens = _settings.DefaultMaxTokens
-            };
+            return new ChatRequestBuilder()
+                .WithModel(model)
+                .WithMessages(new[] { new Message { Role = MessageRole.User, Content = userMessage } })
+                .WithTemperature(_settings.DefaultTemperature)
+                .WithMaxTokens(_settings.DefaultMaxTokens)
+                .Build();
         }
 
         private async Task<string> ProcessChatRequestAsync(ChatRequest request)

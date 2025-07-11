@@ -2,6 +2,8 @@
 using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Enums;
+using GroqSharp.Core.Helpers;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -27,7 +29,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                var model = _modelResolver.GetModelFor(command);
+                var model = ModelSelector.Resolve(_modelResolver, GroqFeature.Speak);
                 var audio = await _ttsService.SynthesizeSpeechAsync(text);
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var fileName = Path.Combine(Path.GetTempPath(), $"groq_tts_{timestamp}.wav");

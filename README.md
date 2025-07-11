@@ -270,6 +270,18 @@ var service = provider.GetRequiredService<IGroqService>();
 var result = await service.GetChatCompletionAsync("Tell me a joke");
 ```
 
+### Fluent Configuration
+
+```csharp
+var request = new ChatRequestBuilder()
+    .WithModel("llama-3.3-70b-versatile")
+    .WithMessages(new[] { new Message { Role = MessageRole.User, Content = "Tell me a joke" } })
+    .WithMaxTokens(1024)
+    .Build();
+
+var result = await service.GetChatCompletionAsync(request);
+```
+
 ## Design Notes
 
 GroqSharp separates conversation persistence (`ConversationSession`) from runtime memory (`ConversationService`). Web API and CLI both create a `ConversationService` per request/session context to ensure clean state management. Sessions are persisted in JSON files and rehydrated on load or message send.

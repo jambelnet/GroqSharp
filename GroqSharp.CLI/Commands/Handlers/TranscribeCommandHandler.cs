@@ -3,6 +3,7 @@ using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.Core.Helpers;
 using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Enums;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
@@ -28,7 +29,7 @@ namespace GroqSharp.CLI.Commands.Handlers
 
             try
             {
-                var model = _modelResolver.GetModelFor(command);
+                var model = ModelSelector.Resolve(_modelResolver, GroqFeature.Transcribe);
                 var content = await _speechToTextService.TranscribeAudioAsync(filePath, model);
                 var extractedContent = OutputFormatter.ExtractChatCompletionContent(content);
 

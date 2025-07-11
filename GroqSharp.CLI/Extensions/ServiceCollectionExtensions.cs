@@ -4,7 +4,6 @@ using GroqSharp.CLI.Commands.Routing;
 using GroqSharp.CLI.Commands.Services;
 using GroqSharp.CLI.Services;
 using GroqSharp.Core.Extensions;
-using GroqSharp.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,9 +13,6 @@ namespace GroqSharp.CLI.Extensions
     {
         public static IServiceCollection AddGroqSharpCommands(this IServiceCollection services)
         {
-            // Core/shared services
-            services.AddSingleton<ModelConfigurationService>();
-
             // Command handlers (alphabetical order for easy maintenance)
             services.AddTransient<ICommandProcessor, AgenticCommandHandler>();
             services.AddTransient<ICommandProcessor, ArchiveCommandHandler>();

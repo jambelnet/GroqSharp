@@ -1,5 +1,6 @@
 ﻿using GroqSharp.Core.Configuration.Models;
 using GroqSharp.Core.Configuration.Services;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Services;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -10,30 +11,25 @@ namespace GroqSharp.Core.Helpers
     {
         public static async Task RunInitialSetupAsync(string outputFile)
         {
-            var tempSettings = new GroqConfiguration
-            {
-                DefaultModel = ConversationService.DefaultModel
-            };
-
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Enter your Groq API key (get it from https://console.groq.com):");
             Console.ResetColor();
-            tempSettings.ApiKey = GetRequiredInput("API Key: ");
+            var apiKey = GetRequiredInput("API Key: ");
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\nEnter base URL (press Enter for default 'https://api.groq.com/openai/v1/'): ");
             Console.ResetColor();
             var baseUrl = Console.ReadLine();
-            tempSettings.BaseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "https://api.groq.com/openai/v1/" : baseUrl;
+            baseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "https://api.groq.com/openai/v1/" : baseUrl;
 
             // Temporary config to fetch models
             var configDict = new Dictionary<string, string>
             {
-                { "Groq:ApiKey", tempSettings.ApiKey },
-                { "Groq:BaseUrl", tempSettings.BaseUrl },
-                { "Groq:DefaultModel", tempSettings.DefaultModel },
-                { "Groq:DefaultTemperature", tempSettings.DefaultTemperature.ToString() },
-                { "Groq:DefaultMaxTokens", tempSettings.DefaultMaxTokens.ToString() }
+                { "Groq:ApiKey", apiKey },
+                { "Groq:BaseUrl", baseUrl },
+                { "Groq:DefaultModel", "llama-3.3-70b-versatile" }, // temp value for resolver
+                { "Groq:DefaultTemperature", "0.7" },
+                { "Groq:DefaultMaxTokens", "1024" }
             };
 
             var tempConfig = new ConfigurationBuilder()
@@ -41,9 +37,18 @@ namespace GroqSharp.Core.Helpers
                 .Build();
 
             var configService = new GroqConfigurationService(tempConfig);
-            var httpClient = new HttpClient { BaseAddress = new Uri(tempSettings.BaseUrl) };
-            var modelConfigService = new ModelConfigurationService(tempConfig);
-            var tempClient = new GroqClient(httpClient, configService, modelConfigService);
+            var modelResolver = new ModelResolver(tempConfig);
+            var defaultModel = modelResolver.GetModelFor(GroqFeature.Default);
+
+            var tempSettings = new GroqConfiguration
+            {
+                ApiKey = apiKey,
+                BaseUrl = baseUrl,
+                DefaultModel = defaultModel
+            };
+
+            var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
+            var tempClient = new GroqClient(httpClient, configService, modelResolver);
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("\nFetching available models...");
@@ -67,7 +72,7 @@ namespace GroqSharp.Core.Helpers
 
             var selectedModel = int.TryParse(modelInput, out var num) && num > 0 && num <= availableModels.Count
                 ? availableModels[num - 1]
-                : ConversationService.DefaultModel;
+                : defaultModel;
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\nConfigure advanced parameters (press Enter for defaults):");
@@ -87,14 +92,22 @@ namespace GroqSharp.Core.Helpers
             {
                 Groq = new
                 {
-                    ApiKey = tempSettings.ApiKey,
-                    BaseUrl = tempSettings.BaseUrl,
+                    ApiKey = apiKey,
+                    BaseUrl = baseUrl,
                     DefaultModel = selectedModel,
                     DefaultVisionModel = "meta-llama/llama-4-scout-17b-16e-instruct",
                     DefaultTTSModel = "playai-tts",
                     DefaultWhisperModel = "whisper-large-v3-turbo",
+                    WhisperLanguage = "en",
+                    DefaultReasoningModel = "deepseek-r1-distill-llama-70b",
+                    DefaultAgenticModel = "compound-beta",
                     DefaultTemperature = temperature,
                     DefaultMaxTokens = maxTokens,
+                    DefaultReasoningTemperature = 0.6,
+                    DefaultVisionTemperature = 1,
+                    DefaultReasoningMaxTokens = 4096,
+                    DefaultTopP = 1,
+                    DefaultReasoningTopP = 0.95
                 }
             };
             await File.WriteAllTextAsync(outputFile,

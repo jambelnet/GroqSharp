@@ -1,17 +1,18 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.CLI.Utilities;
-using GroqSharp.Core.Services;
+using GroqSharp.Core.Enums;
+using GroqSharp.Core.Interfaces;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
     public class SetModelCommandHandler : ICommandProcessor
     {
-        private readonly ModelConfigurationService _modelConfig;
+        private readonly IModelResolver _modelResolver;
 
-        public SetModelCommandHandler(ModelConfigurationService modelConfig)
+        public SetModelCommandHandler(IModelResolver modelResolver)
         {
-            _modelConfig = modelConfig;
+            _modelResolver = modelResolver;
         }
 
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
@@ -24,7 +25,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 var models = await context.GroqService.GetAvailableModelsAsync();
 
                 ConsoleOutputHelper.WriteInfo(
-                    $"\nCurrent Model: {context.CurrentModel ?? Core.Services.ConversationService.DefaultModel}");
+                    $"\nCurrent Model: {context.CurrentModel ?? _modelResolver.GetModelFor(GroqFeature.Default)}");
 
                 ConsoleOutputHelper.WriteInfo("\nAvailable Models:");
                 for (int i = 0; i < models.Count; i++)
@@ -39,7 +40,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                 {
                     var selectedModel = models[choice - 1];
                     context.CurrentModel = selectedModel;
-                    _modelConfig.SetModel(selectedModel);
+                    _modelResolver.SetModel(selectedModel);
 
                     ConsoleOutputHelper.WriteInfo($"Model changed to '{selectedModel}'.");
                 }

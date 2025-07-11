@@ -1,5 +1,4 @@
 ﻿using GroqSharp.Core.Interfaces;
-using GroqSharp.Core.Services;
 using GroqSharp.WebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +9,12 @@ namespace GroqSharp.WebAPI.Controllers
     public class ModelController : ControllerBase
     {
         private readonly IGroqService _groqService;
-        private readonly ModelConfigurationService _modelConfig;
+        private readonly IModelResolver _modelResolver;
 
-        public ModelController(IGroqService groqService, ModelConfigurationService modelConfig)
+        public ModelController(IGroqService groqService, IModelResolver modelResolver)
         {
             _groqService = groqService;
-            _modelConfig = modelConfig;
+            _modelResolver = modelResolver;
         }
 
         [HttpGet("list")]
@@ -35,14 +34,14 @@ namespace GroqSharp.WebAPI.Controllers
             if (!availableModels.Contains(request.Model))
                 return NotFound($"Model '{request.Model}' is not available.");
 
-            _modelConfig.SetModel(request.Model);
+            _modelResolver.SetModel(request.Model);
             return Ok($"Model set to {request.Model}");
         }
 
         [HttpGet("current")]
         public IActionResult GetCurrentModel()
         {
-            var current = _modelConfig.GetModel();
+            var current = _modelResolver.GetModel();
             return Ok(current);
         }
     }

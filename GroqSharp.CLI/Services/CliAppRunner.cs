@@ -1,7 +1,7 @@
 ﻿using GroqSharp.CLI.Commands.Models;
+using GroqSharp.Core.Builders;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Interfaces;
-using GroqSharp.Core.Models;
-using GroqSharp.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -60,21 +60,21 @@ namespace GroqSharp.CLI.Services
         {
             try
             {
-                context.Conversation.AddMessage("user", input);
+                context.Conversation.AddMessage(MessageRole.User, input);
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("AI: ");
                 Console.ResetColor();
 
-                var request = new ChatRequest
-                {
-                    Model = context.CurrentModel ?? ConversationService.DefaultModel,
-                    Messages = context.GetSanitizedMessages(),
-                    Temperature = 0.7
-                };
+                var request = new ChatRequestBuilder()
+                    .WithModel(context.CurrentModel)
+                    .WithMessages(context.GetSanitizedMessages())
+                    .WithTemperature(0.7)
+                    .WithMaxTokens(4096)
+                    .Build();
 
                 string response = await context.GroqService.GetChatCompletionAsync(request);
-                context.Conversation.AddMessage("assistant", response);
+                context.Conversation.AddMessage(MessageRole.Assistant, response);
                 await context.SaveConversation();
 
                 Console.ForegroundColor = ConsoleColor.Green;

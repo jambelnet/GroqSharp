@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using GroqSharp.Core.Services;
 
 namespace GroqSharp.Core.Models
 {
@@ -7,7 +6,7 @@ namespace GroqSharp.Core.Models
     {
         public string SessionId { get; set; }
         public string Title { get; set; }
-        public string Model { get; set; } = ConversationService.DefaultModel;
+        public string Model { get; set; }
         public List<Message> Messages { get; set; } = new();
         public DateTime LastModified { get; set; }
 

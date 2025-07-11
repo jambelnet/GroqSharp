@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Models;
+﻿using GroqSharp.Core.Enums;
+using GroqSharp.Core.Models;
 
 namespace GroqSharp.CLI.Utilities
 {
@@ -77,8 +78,8 @@ namespace GroqSharp.CLI.Utilities
 
             Console.ForegroundColor = msg.Role switch
             {
-                "user" => ConsoleColor.Cyan,
-                "assistant" => ConsoleColor.Green,
+                MessageRole.User => ConsoleColor.Cyan,
+                MessageRole.Assistant => ConsoleColor.Green,
                 _ => ConsoleColor.Gray
             };
 

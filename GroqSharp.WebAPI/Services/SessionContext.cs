@@ -17,13 +17,13 @@ namespace GroqSharp.WebAPI.Services
             Conversation = conversation;
         }
 
-        public static async Task<SessionContext> CreateAsync(string sessionId, IGlobalConversationService globalService)
+        public static async Task<SessionContext> CreateAsync(string sessionId, IGlobalConversationService globalService, IModelResolver modelResolver)
         {
             if (string.IsNullOrWhiteSpace(sessionId))
                 throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
 
             var session = await globalService.GetOrCreateSessionAsync(sessionId);
-            var conversation = new ConversationService(globalService);
+            var conversation = new ConversationService(globalService, modelResolver);
             conversation.LoadFromSession(session);
             return new SessionContext(sessionId, session, conversation);
         }

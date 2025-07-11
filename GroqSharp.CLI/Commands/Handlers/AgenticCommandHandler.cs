@@ -1,6 +1,8 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Builders;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
@@ -44,14 +46,15 @@ namespace GroqSharp.CLI.Commands.Handlers
                     Country = ExtractArg(args, "--country=")
                 };
 
-                context.Conversation.AddMessage("user", query);
+                context.Conversation.AddMessage(MessageRole.User, query);
+                var model = ModelSelector.Resolve(_modelResolver, GroqFeature.Agentic);
 
-                var request = new ChatRequest
-                {
-                    Model = _modelResolver.GetModelFor("/agent"),
-                    Messages = context.GetSanitizedMessages(),
-                    SearchSettings = searchSettings
-                };
+                var request = new ChatRequestBuilder()
+                    .WithModel(model)
+                    .WithMessages(context.GetSanitizedMessages())
+                    .WithSearchSettings(searchSettings)
+                    .WithMaxTokens(4096)
+                    .Build();
 
                 var response = await _groqService.GetStructuredResponseAsync(request);
                 var message = response?.Choices?.FirstOrDefault()?.Message;

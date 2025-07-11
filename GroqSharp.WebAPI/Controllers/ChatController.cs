@@ -1,4 +1,7 @@
-﻿using GroqSharp.Core.Helpers;
+﻿using GroqSharp.Core.Builders;
+using GroqSharp.Core.Configuration.Interfaces;
+using GroqSharp.Core.Enums;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using GroqSharp.WebAPI.Services;
@@ -11,17 +14,23 @@ namespace GroqSharp.WebAPI.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IGlobalConversationService _conversationService;
+        private readonly IGroqConfigurationService _configurationService;
         private readonly IGroqService _groqService;
         private readonly IConfiguration _config;
+        private readonly IModelResolver _modelResolver;
 
         public ChatController(
             IGlobalConversationService conversationService,
+            IGroqConfigurationService configurationService,
             IGroqService groqService,
-            IConfiguration config)
+            IConfiguration config,
+            IModelResolver modelResolver)
         {
             _conversationService = conversationService;
+            _configurationService = configurationService;
             _groqService = groqService;
             _config = config;
+            _modelResolver = modelResolver;
         }
 
         [HttpPost("messages")]
@@ -30,18 +39,24 @@ namespace GroqSharp.WebAPI.Controllers
             if (string.IsNullOrWhiteSpace(userMessage?.Content))
                 return BadRequest("Message content cannot be empty.");
 
-            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService, _modelResolver);
 
-            sessionContext.Conversation.AddMessage("user", userMessage.Content);
+            sessionContext.Conversation.AddMessage(MessageRole.User, userMessage.Content);
 
-            var response = await _groqService.GetChatCompletionAsync(new ChatRequest
-            {
-                Model = sessionContext.Conversation.CurrentModel,
-                Messages = sessionContext.Conversation.GetApiMessages().SanitizeForApi().ToArray(),
-                Temperature = double.TryParse(_config["Groq:DefaultTemperature"], out var temp) ? temp : 0.7
-            });
+            var defaults = _configurationService.GetDefaultsFor(GroqFeature.Default);
+            var temperature = defaults.Temperature;
+            var maxTokens = defaults.MaxTokens;
 
-            sessionContext.Conversation.AddMessage("assistant", response);
+            var request = new ChatRequestBuilder()
+                .WithModel(sessionContext.Conversation.CurrentModel)
+                .WithMessages(sessionContext.Conversation.GetApiMessages().SanitizeForApi())
+                .WithTemperature(temperature)
+                .WithMaxTokens(maxTokens)
+                .Build();
+
+            var response = await _groqService.GetChatCompletionAsync(request);
+
+            sessionContext.Conversation.AddMessage(MessageRole.Assistant, response);
             await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
 
             return Ok(new { response });

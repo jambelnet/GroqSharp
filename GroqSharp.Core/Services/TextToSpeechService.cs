@@ -1,5 +1,6 @@
 ﻿using GroqSharp.Core.Configuration.Interfaces;
 using GroqSharp.Core.Configuration.Models;
+using GroqSharp.Core.Enums;
 using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using System.Net.Http.Headers;
@@ -27,7 +28,7 @@ namespace GroqSharp.Core.Services
         {
             var payload = new
             {
-                model = _modelResolver.GetModelFor("/speak"),
+                model = ModelSelector.Resolve(_modelResolver, GroqFeature.Speak),
                 input = text,
                 voice,
                 response_format = "wav"

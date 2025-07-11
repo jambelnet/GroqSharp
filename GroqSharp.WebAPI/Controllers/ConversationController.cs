@@ -9,10 +9,12 @@ namespace GroqSharp.WebAPI.Controllers
     public class ConversationController : ControllerBase
     {
         private readonly IGlobalConversationService _conversationService;
+        private readonly IModelResolver _modelResolver;
 
-        public ConversationController(IGlobalConversationService conversationService)
+        public ConversationController(IGlobalConversationService conversationService, IModelResolver modelResolver)
         {
             _conversationService = conversationService;
+            _modelResolver = modelResolver;
         }
 
         [HttpGet]
@@ -26,7 +28,7 @@ namespace GroqSharp.WebAPI.Controllers
         public async Task<IActionResult> NewSession(string sessionId, [FromQuery] string? title)
         {
             var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
-            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService, _modelResolver);
             session.Title = title ?? session.Title;
             await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
             return Ok(new { message = "New session started.", sessionId, title = session.Title });
@@ -35,7 +37,7 @@ namespace GroqSharp.WebAPI.Controllers
         [HttpPost("{sessionId}/clear")]
         public async Task<IActionResult> Clear(string sessionId)
         {
-            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService, _modelResolver);
             sessionContext.Conversation.ClearHistory();
             await _conversationService.SaveSessionAsync(sessionId, sessionContext.Conversation);
             return Ok(new { message = "Conversation cleared." });
@@ -59,14 +61,14 @@ namespace GroqSharp.WebAPI.Controllers
         public async Task<IActionResult> Load(string sessionId)
         {
             var session = await _conversationService.GetOrCreateSessionAsync(sessionId);
-            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService, _modelResolver);
             return Ok(new { session.Title, sessionContext.Conversation });
         }
 
         [HttpGet("{sessionId}/history")]
         public async Task<IActionResult> GetHistory(string sessionId)
         {
-            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService);
+            var sessionContext = await SessionContext.CreateAsync(sessionId, _conversationService, _modelResolver);
             var history = sessionContext.Conversation.GetFullHistory();
             return Ok(history);
         }

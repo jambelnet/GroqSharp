@@ -1,4 +1,5 @@
-﻿using GroqSharp.Core.Helpers;
+﻿using GroqSharp.Core.Enums;
+using GroqSharp.Core.Helpers;
 using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
 using GroqSharp.Core.Services;
@@ -9,24 +10,25 @@ namespace GroqSharp.CLI.Commands.Models
     {
         private readonly IGlobalConversationService _globalService;
         private readonly IGroqService _groqService;
+        private readonly IModelResolver _modelResolver;
 
-        public string SessionId { get; private set; }
-        public string Title { get; private set; }
-        public string CurrentModel { get; set; }
-
-        public ConversationService Conversation { get; private set; }
-        public bool ShouldExit { get; set; }
-
-        public object PreviousCommandResult { get; set; }
+        public string? SessionId { get; private set; }
+        public string? Title { get; private set; }
+        public string? CurrentModel { get; set; }
 
         public IGroqService GroqService => _groqService;
+        public ConversationService? Conversation { get; private set; }
+        public bool ShouldExit { get; set; }
+        public object? PreviousCommandResult { get; set; }
 
         public CliSessionContext(
             IGlobalConversationService globalService,
-            IGroqService groqService)
+            IGroqService groqService,
+            IModelResolver modelResolver)
         {
             _globalService = globalService;
             _groqService = groqService;
+            _modelResolver = modelResolver;
         }
 
         public async Task InitializeAsync(string sessionId, string? title = null)
@@ -37,12 +39,12 @@ namespace GroqSharp.CLI.Commands.Models
 
             // Use provided title if new, otherwise fallback to loaded
             Title = title ?? session.Title;
-            CurrentModel = session.Model ?? ConversationService.DefaultModel;
+            CurrentModel = session.Model ?? _modelResolver.GetModelFor(GroqFeature.Default);
 
             // If title was overridden, set it (so it's saved next time)
             session.Title = title ?? session.Title;
 
-            Conversation = new ConversationService(_globalService);
+            Conversation = new ConversationService(_globalService, _modelResolver);
             Conversation.LoadFromSession(session);
         }
 

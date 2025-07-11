@@ -1,14 +1,23 @@
 ﻿using GroqSharp.CLI.Commands.Interfaces;
 using GroqSharp.CLI.Commands.Models;
 using GroqSharp.CLI.Utilities;
+using GroqSharp.Core.Builders;
+using GroqSharp.Core.Enums;
+using GroqSharp.Core.Interfaces;
 using GroqSharp.Core.Models;
-using GroqSharp.Core.Services;
 using System.Text;
 
 namespace GroqSharp.CLI.Commands.Handlers
 {
     public class StreamCommandHandler : ICommandProcessor
     {
+        private readonly IModelResolver _modelResolver;
+
+        public StreamCommandHandler(IModelResolver modelResolver)
+        {
+            _modelResolver = modelResolver;
+        }
+
         public async Task<bool> ProcessCommand(string command, string[] args, CliSessionContext context)
         {
             if (!command.Equals("/stream", StringComparison.OrdinalIgnoreCase))
@@ -27,16 +36,14 @@ namespace GroqSharp.CLI.Commands.Handlers
 
                 try
                 {
-                    context.Conversation.AddMessage(new Message { Role = "user", Content = input });
+                    context.Conversation.AddMessage(new Message { Role = MessageRole.User, Content = input });
 
-                    var model = context.CurrentModel ?? ConversationService.DefaultModel;
-
-                    var request = new ChatRequest
-                    {
-                        Model = model,
-                        Messages = context.GetSanitizedMessages(),
-                        Stream = true
-                    };
+                    var request = new ChatRequestBuilder()
+                        .WithModel(context.CurrentModel ?? _modelResolver.GetModelFor(GroqFeature.Default))
+                        .WithMessages(context.GetSanitizedMessages())
+                        .WithStream(true)
+                        .WithMaxTokens(4096)
+                        .Build();
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write("AI: ");
@@ -62,7 +69,7 @@ namespace GroqSharp.CLI.Commands.Handlers
                     Console.WriteLine();
 
                     var assistantResponse = assistantResponseBuilder.ToString();
-                    context.Conversation.AddMessage(new Message { Role = "assistant", Content = assistantResponse });
+                    context.Conversation.AddMessage(new Message { Role = MessageRole.Assistant, Content = assistantResponse });
                 }
                 catch (Exception ex)
                 {
