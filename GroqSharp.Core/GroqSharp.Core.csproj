@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<Version>1.0.1</Version>
+	<Version>1.0.2</Version>
 	<Authors>John Ambeliotis</Authors>
 	<Company>jambel.net</Company>
 	<PackageId>GroqSharp.Core</PackageId>
